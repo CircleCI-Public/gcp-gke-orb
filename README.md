@@ -36,6 +36,4 @@ For further questions/comments about this or other orbs, visit the Orb Category 
 
 New versions of this orb are published by pushing a SemVer git tag by the Community & Partner Engineering Team.
 
-
-
 [reg-page]: https://circleci.com/orbs/registry/orb/circleci/gcp-gke
