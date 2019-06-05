@@ -1,4 +1,4 @@
-# GCP: GKE Orb [![CircleCI Build Status](https://circleci.com/gh/cci-orbs/gcp-gke.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/cci-orbs/gcp-gke) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/circleci/gcp-gke)][reg-page] [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/cci-orbs/gcp-gke/master/LICENSE)
+# GCP: GKE Orb [![CircleCI Build Status](https://circleci.com/gh/CircleCI-Public/gcp-gke-orb.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/CircleCI-Public/gcp-gke-orb) [![CircleCI Orb Version](https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/circleci/gcp-gke)][reg-page] [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/CircleCI-Public/gcp-gke-orb/master/LICENSE)
 
 A GKE Orb for CircleCI.
 It allows you to interact with Google Cloud Platform's (GCP) Google Kubernetes Engine (GKE) from within a CircleCI build job.
@@ -29,8 +29,8 @@ Example use as well as a list of available executors, commands, and jobs are ava
 
 
 ## Contributing
-We welcome [issues](https://github.com/cci-orbs/gcp-gke/issues) to and [pull requests](https://github.com/cci-orbs/gcp-gke/pulls) against this repository!
-For further questions/comments about this or other orbs, visit the Orb Category of [CircleCI Discuss](https://discuss.circleci.com/c/orbs).
+We welcome [issues](https://github.com/CircleCI-Public/gcp-gke-orb/issues) to and [pull requests](https://github.com/CircleCI-Public/gcp-gke-orb/pulls) against this repository!
+For further questions/comments about this or other orbs, visit the Orb Category of [CircleCI Discuss](https://discuss.circleci.com/c/ecosystem/orbs).
 
 ### Publishing
 
