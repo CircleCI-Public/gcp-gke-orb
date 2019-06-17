@@ -6,7 +6,7 @@ orbs:
 executors:
   cibuilds:
     docker:
-      - image: cibuilds/base:2019.03
+      - image: cibuilds/base:2019.05
 
 workflows:
   main:
@@ -23,7 +23,7 @@ workflows:
             tags:
               # Simplified SemVer regex
               only: /^\d+\.\d+\.\d+$/
-          context: main
+          context: orb-publishing
 
 jobs:
   test:
