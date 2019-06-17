@@ -20,6 +20,9 @@ commands:
   rollout-image:
     description: "Update a deployment's Docker image."
     parameters:
+      cluster:
+        description: "The Kubernetes cluster name."
+        type: string
       deployment:
         description: "The Kubernetes deployment name."
         type: string
@@ -31,7 +34,7 @@ commands:
         type: string
     steps:
       - run: |
-          gcloud container clusters get-credentials <<parameters.deployment>>
+          gcloud container clusters get-credentials <<parameters.cluster>>
           kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
 
 jobs:
