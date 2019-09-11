@@ -32,10 +32,14 @@ commands:
       image:
         description: A name for your docker image
         type: string
+      namespace:
+        description: "The Kubernetes namespace name."
+        type: string
+        default: "default"
     steps:
       - run: |
           gcloud container clusters get-credentials <<parameters.cluster>>
-          kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+          kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
 
 jobs:
   publish-and-rollout-image:
@@ -48,6 +52,10 @@ jobs:
       deployment:
         description: "The Kubernetes deployment name."
         type: string
+      namespace:
+        description: "The Kubernetes namespace name."
+        type: string
+        default: "default"
       container:
         description: "The Kubernetes container name."
         type: string
@@ -98,6 +106,7 @@ jobs:
       - rollout-image:
           cluster: "<<parameters.cluster>>"
           deployment: "<<parameters.deployment>>"
+          namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
           image: "<<parameters.image>>"
 
