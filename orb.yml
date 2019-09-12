@@ -4,7 +4,7 @@ description: Google Kubernetes Engine (GKE) Orb
 # Orb Dependencies
 orbs:
   gcloud: circleci/gcp-cli@1.0.6
-  gcr: circleci/gcp-gcr@0.0.2
+  gcr: circleci/gcp-gcr@0.6.1
   k8s: circleci/kubernetes@0.1.0
 
 commands:
@@ -89,7 +89,7 @@ jobs:
           google-project-id: <<parameters.google-project-id>>
           image: <<parameters.image>>
           tag: << parameters.tag >>
-          path-to-dockerfile: <<parameters.path-to-dockerfile>>
+          path: <<parameters.path-to-dockerfile>>
       - gcr/push-image:
           registry-url: <<parameters.registry-url>>
           google-project-id: <<parameters.google-project-id>>
