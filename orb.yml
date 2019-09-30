@@ -1,5 +1,5 @@
 version: 2.1
-description: Google Kubernetes Engine (GKE) Orb
+description: Google Kubernetes Engine (GKE) Orb[Repo here](https://github.com/CircleCI-Public/gcp-gke-orb)
 
 # Orb Dependencies
 orbs:
