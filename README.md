@@ -3,6 +3,9 @@
 A GKE Orb for CircleCI.
 It allows you to interact with Google Cloud Platform's (GCP) Google Kubernetes Engine (GKE) from within a CircleCI build job.
 
+## Repository URL 
+
+https://github.com/CircleCI-Public/gcp-gke-orb
 
 ## Prerequisites
 
