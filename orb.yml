@@ -32,10 +32,13 @@ commands:
       image:
         description: A name for your docker image
         type: string
+      tag:
+        type: string
+        description: A Docker image tag
     steps:
       - run: |
           gcloud container clusters get-credentials <<parameters.cluster>>
-          kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+          kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>>
 
 jobs:
   publish-and-rollout-image:
@@ -100,6 +103,7 @@ jobs:
           deployment: "<<parameters.deployment>>"
           container: "<<parameters.container>>"
           image: "<<parameters.image>>"
+          tag: "<< parameters.tag >>"
 
 example:
   publish-and-rollout-image:
