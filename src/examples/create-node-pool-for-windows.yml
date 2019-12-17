@@ -1,0 +1,21 @@
+description: >
+  Create a node pool for Windows container usage
+usage:
+  version: 2.1
+  orbs:
+    gke: circleci/gcp-gke@x.y.z
+  workflows:
+    main:
+      jobs:
+        # Expects environment variables with the default names
+        # used by the circleci/gcp-cli orb's initialize command
+        # https://circleci.com/orbs/registry/orb/circleci/gcp-cli#commands-initialize
+        - gke/create-cluster:
+            cluster: gcp-testing
+            additional-args: "--cluster-version=1.14 --enable-ip-alias --num-nodes=1"
+        - gke/create-node-pool:
+            requires:
+              - gke/create-cluster
+            node-pool: my-windows-node-pool
+            cluster: gcp-testing
+            additional-args: "--image-type=WINDOWS_SAC --no-enable-autoupgrade --machine-type=n1-standard-2"

@@ -1,0 +1,25 @@
+description: "Update a deployment's Docker image."
+parameters:
+  cluster:
+    description: "The Kubernetes cluster name."
+    type: string
+  deployment:
+    description: "The Kubernetes deployment name."
+    type: string
+  container:
+    description: "The Kubernetes container name."
+    type: string
+  image:
+    description: A fully-qualified name for your docker image
+    type: string
+  tag:
+    description: Docker image tag
+    type: string
+    default: latest
+steps:
+  - update-kubeconfig-with-credentials:
+      cluster: <<parameters.cluster>>
+  - run:
+      name: Roll out image
+      command: |
+        kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>>
