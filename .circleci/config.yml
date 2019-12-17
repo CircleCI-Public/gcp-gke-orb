@@ -25,7 +25,7 @@ executors:
   test:
     docker:
       - image: cimg/base:stable
-    working_directory: ~/project/tests/demoapp
+    working_directory: /root/project/tests/demoapp
 
 jobs:
   create-deployment:
