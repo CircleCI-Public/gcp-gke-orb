@@ -38,6 +38,7 @@ parameters:
 steps:
   - create-cluster:
       cluster: <<parameters.cluster>>
+      install-kubectl: true
       perform-login: true
       gcloud-service-key: <<parameters.gcloud-service-key>>
       google-project-id: <<parameters.google-project-id>>

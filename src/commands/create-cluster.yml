@@ -27,9 +27,18 @@ parameters:
     description: Additional arguments to "gcloud container clusters create"
     type: string
     default: ""
+  install-kubectl:
+    description: >
+        Whether to install kubectl
+    type: boolean
+    default: false
 
 steps:
   - gcloud/install
+  - when:
+      condition: <<parameters.install-kubectl>>
+      steps:
+        - k8s/install-kubectl
   - when:
       condition: <<parameters.perform-login>>
       steps:
