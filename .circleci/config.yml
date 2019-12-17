@@ -45,10 +45,10 @@ jobs:
           command: |
             # Replace the placeholders in the manifest with the intended values.
             BUILD_DATE=$(date '+%Y%m%d%H%M%S')
-            cat deployment.yaml.template |\
+            cat tests/demoapp/deployment.yaml.template |\
                sed "s|DOCKER_IMAGE_NAME|<< parameters.full-image-name >>:$CIRCLE_SHA1|\
                 g;s|BUILD_DATE_VALUE|$BUILD_DATE|g;s|VERSION_INFO_VALUE|\
-                << parameters.version-info >>|g" > deployment.yaml
+                << parameters.version-info >>|g" > tests/demoapp/deployment.yaml
       - gcp-gcr/gcr-auth
       - gcp-gcr/build-image:
           image: << parameters.docker-image-name >>
@@ -59,7 +59,7 @@ jobs:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
       - kubernetes/create-or-update-resource:
-          resource-file-path: "deployment.yaml"
+          resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
 
