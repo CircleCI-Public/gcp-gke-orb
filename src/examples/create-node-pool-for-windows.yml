@@ -1,4 +1,4 @@
-description: |
+description: >
   Create a node pool for Windows container usage
 usage:
   version: 2.1

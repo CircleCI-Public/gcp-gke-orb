@@ -22,7 +22,7 @@ parameters:
     default: "dev:alpha"
 
 jobs:
-  create-deployment:
+  create-deployment-linux:
     parameters:
       cluster-name:
         type: string
@@ -62,6 +62,51 @@ jobs:
           resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
+  create-deployment-windows:
+    parameters:
+      cluster-name:
+        type: string
+    executor: gcp-gke/default
+    steps:
+      - setup_remote_docker
+      - checkout
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: <<parameters.cluster-name>>
+          perform-login: true
+          install-kubectl: true
+      - run:
+          name: Check cluster initialization
+          command: |
+            kubectl get mutatingwebhookconfigurations
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "tests/windows-iis/deployment.yaml"
+          resource-name: "deployment/iis"
+          get-rollout-status: true
+      - run:
+          name: Expose deployment via a service
+          command: |
+            kubectl expose deployment iis --type=LoadBalancer --name=iis
+      - run:
+          name: Validate service
+          command: |
+            kubectl get services
+            sleep 30
+            for attempt in {1..20}; do
+              EXTERNAL_IP=$(kubectl get service iis | awk '{print $4}' | tail -n1)
+              echo "Checking external IP: ${EXTERNAL_IP}"
+              if [ -n "${EXTERNAL_IP}" ] && [ -z $(echo "${EXTERNAL_IP}" | grep "pending") ]; then
+                break
+              fi
+              echo "Waiting for external IP to be ready: ${EXTERNAL_IP}"
+              sleep 10
+            done
+            sleep 180
+            curl -s --retry 10 "http://$EXTERNAL_IP" | grep "IIS Windows Server"
+      - kubernetes/delete-resource:
+          resource-types: "deployment,service"
+          resource-names: "iis"
+          now: true
+          wait: true
 
 workflows:
   lint_pack-validate_publish-dev:
@@ -89,21 +134,30 @@ workflows:
     when: << pipeline.parameters.run-integration-tests >>
     jobs:
       - gcp-gke/create-cluster:
+          name: create-cluster-linux
           cluster: my-cluster
+      - gcp-gke/create-cluster:
+          name: create-cluster-windows
+          cluster: my-cluster-windows
           additional-args: "--cluster-version=1.14 --enable-ip-alias"
       - gcp-gke/create-node-pool:
-          node-pool: my-pool
-          cluster: my-cluster
-          additional-args: "--image-type=UBUNTU --no-enable-autoupgrade --machine-type=n1-standard-2"
+          name: create-node-pool-windows
+          node-pool: my-pool-windows
+          cluster: my-cluster-windows
+          additional-args: "--image-type=WINDOWS_SAC --no-enable-autoupgrade --machine-type=n1-standard-2"
           requires:
-            - gcp-gke/create-cluster
-      - create-deployment:
+            - create-cluster-windows
+      - create-deployment-linux:
           requires:
-            - gcp-gke/create-node-pool
+            - create-cluster-linux
           cluster-name: my-cluster
           full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
           docker-image-name: my-image
           version-info: $CIRCLE_SHA1
+      - create-deployment-windows:
+          requires:
+            - create-node-pool-windows
+          cluster-name: my-cluster-windows
       - gcp-gke/publish-and-rollout-image:
           post-steps:
             - kubernetes/get-rollout-status:
@@ -111,7 +165,7 @@ workflows:
                 watch-rollout-status: true
                 watch-timeout: 3m
           requires:
-            - create-deployment
+            - create-deployment-linux
           cluster: my-cluster
           deployment: demoapp
           container: app
@@ -119,10 +173,22 @@ workflows:
           tag: $CIRCLE_SHA1
           dockerfile-name: tests/demoapp/Dockerfile
           dockerfile-dir: /root/project/tests/demoapp
+      - gcp-gke/delete-node-pool:
+          name: delete-node-pool-windows
+          node-pool: my-pool-windows
+          cluster: my-cluster-windows
+          requires:
+            - create-deployment-windows
       - gcp-gke/delete-cluster:
+          name: delete-cluster-linux
           cluster: my-cluster
           requires:
             - gcp-gke/publish-and-rollout-image
+      - gcp-gke/delete-cluster:
+          name: delete-cluster-windows
+          cluster: my-cluster-windows
+          requires:
+            - delete-node-pool-windows
       - orb-tools/dev-promote-prod-from-commit-subject:
           orb-name: circleci/gcp-gke
           context: orb-publishing
@@ -132,7 +198,8 @@ workflows:
           publish-version-tag: false
           fail-if-semver-not-indicated: false
           requires:
-            - gcp-gke/delete-cluster
+            - delete-cluster-linux
+            - delete-cluster-windows
           filters:
             branches:
               only: master

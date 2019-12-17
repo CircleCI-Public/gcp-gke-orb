@@ -1,4 +1,4 @@
-description: |
+description: >
   Create a GKE cluster
 usage:
   version: 2.1

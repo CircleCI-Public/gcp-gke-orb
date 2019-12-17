@@ -1,4 +1,4 @@
-description: |
+description: >
   Creates a GKE cluster.
 
 executor: <<parameters.executor>>

@@ -1,10 +1,12 @@
 description: >
-  Creates a node pool in a running GKE cluster.
+  Deletes a node pool in a running GKE cluster.
+
+executor: <<parameters.executor>>
 
 parameters:
   node-pool:
     description: >
-      Name of the node pool to be created
+      Name of the node pool to be deleted
     type: string
   cluster:
     description: >
@@ -28,20 +30,21 @@ parameters:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
   additional-args:
-    description: Additional arguments to "gcloud container node-pools create"
+    description: Additional arguments to "gcloud container node-pools delete"
     type: string
     default: ""
+  executor:
+    description: >
+        Executor to use for this job
+    type: executor
+    default: default
 
 steps:
-  - gcloud/install
-  - when:
-      condition: <<parameters.perform-login>>
-      steps:
-        - gcloud/initialize:
-            gcloud-service-key: <<parameters.gcloud-service-key>>
-            google-project-id: <<parameters.google-project-id>>
-            google-compute-zone: <<parameters.google-compute-zone>>
-  - run:
-      name: Create node pool
-      command: |
-        gcloud container node-pools create <<parameters.node-pool>> --cluster <<parameters.cluster >> <<parameters.additional-args>>
+  - delete-node-pool:
+      node-pool: <<parameters.node-pool>>
+      cluster: <<parameters.cluster>>
+      perform-login: true
+      gcloud-service-key: <<parameters.gcloud-service-key>>
+      google-project-id: <<parameters.google-project-id>>
+      google-compute-zone: <<parameters.google-compute-zone>>
+      additional-args: <<parameters.additional-args>>

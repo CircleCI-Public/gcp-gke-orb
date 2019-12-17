@@ -1,4 +1,4 @@
-description: |
+description: >
   Creates a node pool in a running GKE cluster.
 
 executor: <<parameters.executor>>

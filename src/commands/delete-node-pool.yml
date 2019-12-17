@@ -1,10 +1,14 @@
 description: >
-  Creates a GKE cluster.
+  Deletes a node pool in a running GKE cluster.
 
 parameters:
+  node-pool:
+    description: >
+      Name of the node pool to be deleted
+    type: string
   cluster:
     description: >
-      Name of the GKE cluster to be created
+      Name of the GKE cluster
     type: string
   perform-login:
     description: >
@@ -24,21 +28,12 @@ parameters:
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
   additional-args:
-    description: Additional arguments to "gcloud container clusters create"
+    description: Additional arguments to "gcloud container node-pools delete"
     type: string
     default: ""
-  install-kubectl:
-    description: >
-        Whether to install kubectl
-    type: boolean
-    default: false
 
 steps:
   - gcloud/install
-  - when:
-      condition: <<parameters.install-kubectl>>
-      steps:
-        - k8s/install-kubectl
   - when:
       condition: <<parameters.perform-login>>
       steps:
@@ -47,6 +42,6 @@ steps:
             google-project-id: <<parameters.google-project-id>>
             google-compute-zone: <<parameters.google-compute-zone>>
   - run:
-      name: Create GKE cluster
+      name: Delete node pool
       command: |
-        gcloud container clusters create <<parameters.cluster >> <<parameters.additional-args>>
+        gcloud container node-pools delete <<parameters.node-pool>> --cluster <<parameters.cluster >> <<parameters.additional-args>>

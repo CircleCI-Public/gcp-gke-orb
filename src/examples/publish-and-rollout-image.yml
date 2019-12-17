@@ -1,4 +1,4 @@
-description: |
+description: >
   "The simplest example of using this Orb. Logs into GCP, builds and
   publishes a Docker image, and then rolls the image out to a GKE cluster."
 usage:

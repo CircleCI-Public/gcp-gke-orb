@@ -1,4 +1,4 @@
-description: |
+description: >
   Deletes a GKE cluster.
 
 executor: <<parameters.executor>>
