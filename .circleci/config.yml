@@ -21,12 +21,6 @@ parameters:
     type: string
     default: "dev:alpha"
 
-executors:
-  test:
-    docker:
-      - image: cimg/base:stable
-    working_directory: /root/project/tests/demoapp
-
 jobs:
   create-deployment:
     parameters:
@@ -38,7 +32,7 @@ jobs:
         type: string
       version-info:
         type: string
-    executor: test
+    executor: gcp-gke/default
     steps:
       - setup_remote_docker
       - checkout
@@ -59,6 +53,8 @@ jobs:
       - gcp-gcr/build-image:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
+          dockerfile: tests/demoapp/Dockerfile
+          path: /root/project/tests/demoapp
       - gcp-gcr/push-image:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
@@ -121,7 +117,8 @@ workflows:
           container: app
           image: my-image
           tag: $CIRCLE_SHA1
-          executor: test
+          dockerfile-name: tests/demoapp/Dockerfile
+          dockerfile-dir: /root/project/tests/demoapp
       - gcp-gke/delete-cluster:
           cluster: my-cluster
           requires:
