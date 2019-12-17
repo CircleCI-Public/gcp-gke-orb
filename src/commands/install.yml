@@ -1,0 +1,4 @@
+description: "Install `gcloud` and `kubectl` if not already installed."
+steps:
+  - gcloud/install
+  - k8s/install-kubectl

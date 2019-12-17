@@ -22,8 +22,8 @@ Example use as well as a list of available executors, commands, and jobs are ava
 
 ## Resources
 
-[CircleCI Orb Registry Page][reg-page] - The official registry page for this orb will all versions, executors, commands, and jobs described.  
-[CircleCI Orb Docs](https://circleci.com/docs/2.0/orb-intro/#section=configuration) - Docs for using and creating CircleCI Orbs.  
+[CircleCI Orb Registry Page][reg-page] - The official registry page for this orb will all versions, executors, commands, and jobs described.
+[CircleCI Orb Docs](https://circleci.com/docs/2.0/orb-intro/#section=configuration) - Docs for using and creating CircleCI Orbs.
 [Google Cloud Platform (GCP) Docs](https://cloud.google.com/docs/) - General docs for GCP.
 [GCP: Google Kubernetes Engine (GKE) Docs](https://cloud.google.com/kubernetes-engine/docs/) - GCP Docs specifically on GKE.
 
@@ -31,9 +31,5 @@ Example use as well as a list of available executors, commands, and jobs are ava
 ## Contributing
 We welcome [issues](https://github.com/CircleCI-Public/gcp-gke-orb/issues) to and [pull requests](https://github.com/CircleCI-Public/gcp-gke-orb/pulls) against this repository!
 For further questions/comments about this or other orbs, visit the Orb Category of [CircleCI Discuss](https://discuss.circleci.com/c/ecosystem/orbs).
-
-### Publishing
-
-New versions of this orb are published by pushing a SemVer git tag by the Community & Partner Engineering Team.
 
 [reg-page]: https://circleci.com/orbs/registry/orb/circleci/gcp-gke

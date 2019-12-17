@@ -1,43 +1,150 @@
 version: 2.1
 
+orb_promotion_filters: &orb_promotion_filters
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+
 orbs:
-  cli: circleci/circleci-cli@0.1.4
+  # TODO: set to new major release version of orb-tools once available
+  orb-tools: circleci/orb-tools@dev:newworkflow
+  gcp-gke: circleci/gcp-gke@<<pipeline.parameters.dev-orb-version>>
+  gcp-gcr: circleci/gcp-gcr@0.6.1
+  kubernetes: circleci/kubernetes@0.10.0
 
-executors:
-  cibuilds:
-    docker:
-      - image: cibuilds/base:2019.06
-
-workflows:
-  main:
-    jobs:
-      - test:
-          filters:
-            tags:
-              # Simplified SemVer regex
-              only: /^\d+\.\d+\.\d+$/
-      - publish:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              # Simplified SemVer regex
-              only: /^\d+\.\d+\.\d+$/
-          context: orb-publishing
+parameters:
+  run-integration-tests:
+    type: boolean
+    default: false
+  dev-orb-version:
+    type: string
+    default: "dev:alpha"
 
 jobs:
-  test:
-    executor: cibuilds
+  create-deployment:
+    executor: gcp-gke/default
+    parameters:
+      cluster-name:
+        type: string
+      docker-image-name:
+        type: string
+      full-image-name:
+        type: string
+      version-info:
+        type: string
     steps:
+      - setup_remote_docker
       - checkout
-      - cli/install
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: <<parameters.cluster-name>>
+          perform-login: true
+          install-kubectl: true
       - run:
-          name: "Validate Orb config"
-          command: circleci orb validate orb.yml
-  publish:
-    executor: cli/default
-    steps:
-      - checkout
-      - run:
-          name: "Publish orb via the CircleCI CLI"
-          command: circleci orb publish orb.yml circleci/gcp-gke@${CIRCLE_TAG}
+          name: Create deployment manifest
+          command: |
+            # Replace the placeholders in the manifest with the intended values.
+            BUILD_DATE=$(date '+%Y%m%d%H%M%S')
+            cat tests/demoapp/deployment.yaml.template |\
+               sed "s|DOCKER_IMAGE_NAME|<< parameters.full-image-name >>:$CIRCLE_SHA1|\
+                g;s|BUILD_DATE_VALUE|$BUILD_DATE|g;s|VERSION_INFO_VALUE|\
+                << parameters.version-info >>|g" > tests/demoapp/deployment.yaml
+      - gcp-gcr/gcr-auth
+      - gcp-gcr/build-image:
+          image: << parameters.docker-image-name >>
+          tag: $CIRCLE_SHA1
+      - gcp-gcr/push-image:
+          image: << parameters.docker-image-name >>
+          tag: $CIRCLE_SHA1
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "tests/demoapp/deployment.yaml"
+          get-rollout-status: true
+          resource-name: deployment/demoapp
+
+workflows:
+  lint_pack-validate_publish-dev:
+    unless: << pipeline.parameters.run-integration-tests >>
+    jobs:
+      - orb-tools/lint
+
+      - orb-tools/pack:
+          requires:
+            - orb-tools/lint
+
+      - orb-tools/publish-dev:
+          orb-name: circleci/gcp-gke
+          context: orb-publishing
+          requires:
+            - orb-tools/pack
+
+      - orb-tools/trigger-integration-tests-workflow:
+          name: trigger-integration-dev
+          context: orb-publishing
+          requires:
+            - orb-tools/publish-dev
+
+  integration-tests_prod-release:
+    when: << pipeline.parameters.run-integration-tests >>
+    jobs:
+      - gcp-gke/create-cluster:
+          cluster: my-cluster
+          additional-args: "--cluster-version=1.14 --enable-ip-alias"
+      - gcp-gke/create-node-pool:
+          node-pool: my-pool
+          cluster: my-cluster
+          additional-args: "--image-type=UBUNTU --no-enable-autoupgrade --machine-type=n1-standard-2"
+          requires:
+            - gcp-gke/create-cluster
+      - create-deployment:
+          requires:
+            - gcp-gke/create-node-pool
+          cluster-name: my-cluster
+          full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
+          docker-image-name: my-image
+          version-info: $CIRCLE_SHA1
+      - gcp-gke/publish-and-rollout-image:
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+          requires:
+            - create-deployment
+          cluster: my-cluster
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+      - gcp-gke/delete-cluster:
+          cluster: my-cluster
+          requires:
+            - gcp-gke/publish-and-rollout-image
+      - orb-tools/dev-promote-prod-from-commit-subject:
+          orb-name: circleci/gcp-gke
+          context: orb-publishing
+          add-pr-comment: true
+          bot-user: cpe-bot
+          bot-token-variable: GHI_TOKEN
+          publish-version-tag: false
+          fail-if-semver-not-indicated: false
+          requires:
+            - gcp-gke/delete-cluster
+          filters:
+            branches:
+              only: master
+
+  tag-triggered-orb-publishing:
+    unless: << pipeline.parameters.run-integration-tests >>
+    jobs:
+      - hold-for-approval:
+          type: approval
+          filters: *orb_promotion_filters
+      - orb-tools/dev-promote-prod-from-git-tag:
+          context: orb-publishing
+          orb-name: circleci/gcp-gke
+          add-pr-comment: true
+          bot-user: cpe-bot
+          bot-token-variable: GHI_TOKEN
+          requires:
+            - hold-for-approval
+          filters: *orb_promotion_filters
