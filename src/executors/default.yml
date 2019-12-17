@@ -4,12 +4,12 @@ description: >
 parameters:
   image:
     type: string
-    default: circleci/python
+    default: cimg/python
     description: Docker image name
 
   tag:
     type: string
-    default: "3.7"
+    default: "stable"
     description: Image tag
 
 docker:

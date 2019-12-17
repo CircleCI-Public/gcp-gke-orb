@@ -21,6 +21,12 @@ parameters:
     type: string
     default: "dev:alpha"
 
+executors:
+  test:
+    docker:
+      - image: cimg/base:stable
+    working_directory: ~/project/tests/demoapp
+
 jobs:
   create-deployment:
     executor: gcp-gke/default
@@ -115,7 +121,7 @@ workflows:
           container: app
           image: my-image
           tag: $CIRCLE_SHA1
-          dockerfile-dir: tests/demoapp
+          executor: test
       - gcp-gke/delete-cluster:
           cluster: my-cluster
           requires:
