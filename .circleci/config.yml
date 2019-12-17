@@ -115,6 +115,7 @@ workflows:
           container: app
           image: my-image
           tag: $CIRCLE_SHA1
+          dockerfile-dir: tests/demoapp
       - gcp-gke/delete-cluster:
           cluster: my-cluster
           requires:
