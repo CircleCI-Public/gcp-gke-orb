@@ -1,10 +1,10 @@
 version: 2.1
 
 orb_promotion_filters: &orb_promotion_filters
-    branches:
-      ignore: /.*/
-    tags:
-      only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
 
 orbs:
   # TODO: set to new major release version of orb-tools once available
