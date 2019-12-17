@@ -29,6 +29,12 @@ parameters:
     description: Additional arguments to "gcloud container clusters create"
     type: string
     default: ""
+  no-output-timeout:
+    description: >
+      Elapsed time that the cluster creation command can run on CircleCI without output.
+      The string is a decimal with unit suffix, such as “20m”, “1.25h”, “5s”
+    type: string
+    default: "10m"
   executor:
     description: >
         Executor to use for this job
@@ -44,3 +50,4 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       google-compute-zone: <<parameters.google-compute-zone>>
       additional-args: <<parameters.additional-args>>
+      no-output-timeout: <<parameters.no-output-timeout>>

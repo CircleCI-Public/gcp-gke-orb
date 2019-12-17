@@ -32,6 +32,12 @@ parameters:
         Whether to install kubectl
     type: boolean
     default: false
+  no-output-timeout:
+    description: >
+      Elapsed time that the cluster creation command can run on CircleCI without output.
+      The string is a decimal with unit suffix, such as “20m”, “1.25h”, “5s”
+    type: string
+    default: "10m"
 
 steps:
   - gcloud/install
@@ -50,3 +56,4 @@ steps:
       name: Create GKE cluster
       command: |
         gcloud container clusters create <<parameters.cluster >> <<parameters.additional-args>>
+      no_output_timeout: <<parameters.no-output-timeout>>

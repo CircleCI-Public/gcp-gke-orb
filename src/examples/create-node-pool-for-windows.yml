@@ -12,7 +12,7 @@ usage:
         # https://circleci.com/orbs/registry/orb/circleci/gcp-cli#commands-initialize
         - gke/create-cluster:
             cluster: gcp-testing
-            additional-args: "--cluster-version=1.14 --enable-ip-alias"
+            additional-args: "--cluster-version=1.14 --enable-ip-alias --num-nodes=1"
         - gke/create-node-pool:
             requires:
               - gke/create-cluster
