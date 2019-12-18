@@ -38,7 +38,7 @@ parameters:
       Elapsed time that the node pool creation command can run on CircleCI without output.
       The string is a decimal with unit suffix, such as “20m”, “1.25h”, “5s”
     type: string
-    default: "15m"
+    default: "20m"
   executor:
     description: >
         Executor to use for this job
