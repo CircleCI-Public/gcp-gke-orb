@@ -36,7 +36,7 @@ parameters:
       Elapsed time that the node pool deletion command can run on CircleCI without output.
       The string is a decimal with unit suffix, such as “20m”, “1.25h”, “5s”
     type: string
-    default: "12m"
+    default: "15m"
 
 steps:
   - gcloud/install
@@ -50,5 +50,7 @@ steps:
   - run:
       name: Delete node pool
       command: |
-        gcloud container node-pools delete <<parameters.node-pool>> --cluster <<parameters.cluster >> <<parameters.additional-args>>
+        gcloud container node-pools delete <<parameters.node-pool>> \
+          --cluster <<parameters.cluster >> \
+          --quiet <<parameters.additional-args>>
       no_output_timeout: <<parameters.no-output-timeout>>

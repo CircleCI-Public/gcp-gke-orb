@@ -7,8 +7,7 @@ orb_promotion_filters: &orb_promotion_filters
     only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
 
 orbs:
-  # TODO: set to new major release version of orb-tools once available
-  orb-tools: circleci/orb-tools@dev:newworkflow
+  orb-tools: circleci/orb-tools@9.0.0
   gcp-gke: circleci/gcp-gke@<<pipeline.parameters.dev-orb-version>>
   gcp-gcr: circleci/gcp-gcr@0.6.1
   kubernetes: circleci/kubernetes@0.10.0
