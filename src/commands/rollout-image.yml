@@ -26,7 +26,7 @@ steps:
   - run:
       name: Roll out image
       command: |
-        if [ -n "<< parameters.namespace >>" ]; then
-          set -- "$@" --namespace "<< parameters.namespace >>"
+        if [ -n "<<parameters.namespace>>" ]; then
+          set -- "$@" --namespace="<<parameters.namespace>>"
         fi
         kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>> "$@"
