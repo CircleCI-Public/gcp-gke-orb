@@ -170,6 +170,7 @@ workflows:
           container: app
           image: my-image
           tag: $CIRCLE_SHA1
+          namespace: default
           dockerfile-name: tests/demoapp/Dockerfile
           dockerfile-dir: /home/circleci/project/tests/demoapp
       - gcp-gke/delete-node-pool:

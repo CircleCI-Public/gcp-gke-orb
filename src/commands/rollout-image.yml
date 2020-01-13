@@ -16,10 +16,17 @@ parameters:
     description: Docker image tag
     type: string
     default: latest
+  namespace:
+    description: "The Kubernetes namespace name."
+    type: string
+    default: ""
 steps:
   - update-kubeconfig-with-credentials:
       cluster: <<parameters.cluster>>
   - run:
       name: Roll out image
       command: |
-        kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>>
+        if [ -n "<< parameters.namespace >>" ]; then
+          set -- "$@" --namespace "<< parameters.namespace >>"
+        fi
+        kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>> "$@"
