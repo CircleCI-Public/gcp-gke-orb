@@ -34,6 +34,10 @@ parameters:
     description: A docker image tag
     type: string
     default: "latest"
+  namespace:
+    description: "The Kubernetes namespace name."
+    type: string
+    default: ""
   dockerfile-dir:
     description: >
         Path to the directory containing your Dockerfile and build context,
@@ -91,3 +95,4 @@ steps:
       container: "<<parameters.container>>"
       image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>"
       tag: "<<parameters.tag>>"
+      namespace: "<<parameters.namespace>>"
