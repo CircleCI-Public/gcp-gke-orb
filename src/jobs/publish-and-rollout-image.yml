@@ -65,6 +65,13 @@ parameters:
       if using a Docker-based executor
     type: boolean
     default: true
+  dry-run:
+    default: none
+    description: |
+      Used for image rollout. Must be "none", "server", or "client". If client strategy, only print the object that would be sent, without sending it.
+      If server strategy, submit server-side request without persisting the resource.
+    type: enum
+    enum: ["none", "server", "client"]
 steps:
   - when:
       condition: <<parameters.use-remote-docker>>
@@ -96,3 +103,4 @@ steps:
       image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>"
       tag: "<<parameters.tag>>"
       namespace: "<<parameters.namespace>>"
+      dry-run: "<<parameters.dry-run>>"
