@@ -40,7 +40,7 @@ parameters:
     default: ""
   dockerfile-dir:
     description: >
-        Path to the directory containing your Dockerfile and build context,
+        Path to the directory containing your Dockerfile,
         defaults to . (working directory)
     type: string
     default: .
@@ -72,6 +72,12 @@ parameters:
       If server strategy, submit server-side request without persisting the resource.
     type: enum
     enum: ["none", "server", "client"]
+  docker-context:
+    type: string
+    default: .
+    description: >
+      Path to the directory containing your build context, defaults to .
+      (working directory)
 steps:
   - when:
       condition: <<parameters.use-remote-docker>>
@@ -90,6 +96,7 @@ steps:
       tag: << parameters.tag >>
       path: <<parameters.dockerfile-dir>>
       dockerfile: <<parameters.dockerfile-name>>
+      docker-context: <<parameters.docker-context>>
       extra_build_args: <<parameters.extra-build-args>>
   - gcr/push-image:
       registry-url: <<parameters.registry-url>>
