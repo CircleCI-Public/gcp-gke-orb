@@ -132,64 +132,64 @@ workflows:
   integration-tests_prod-release:
     when: << pipeline.parameters.run-integration-tests >>
     jobs:
-      # - gcp-gke/create-cluster:
-      #     name: create-cluster-linux
-      #     cluster: my-cluster
-      # - gcp-gke/create-cluster:
-      #     name: create-cluster-windows
-      #     cluster: my-cluster-windows
-      #     additional-args: "--cluster-version=1.14 --enable-ip-alias --num-nodes=1"
-      # - gcp-gke/create-node-pool:
-      #     name: create-node-pool-windows
-      #     node-pool: my-pool-windows
-      #     cluster: my-cluster-windows
-      #     additional-args: "--image-type=WINDOWS_SAC --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
-      #     requires:
-      #       - create-cluster-windows
-      # - create-deployment-linux:
-      #     requires:
-      #       - create-cluster-linux
-      #     cluster-name: my-cluster
-      #     full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
-      #     docker-image-name: my-image
-      #     version-info: $CIRCLE_SHA1
-      # - create-deployment-windows:
-      #     requires:
-      #       - create-node-pool-windows
-      #     cluster-name: my-cluster-windows
-      # - gcp-gke/publish-and-rollout-image:
-      #     post-steps:
-      #       - kubernetes/get-rollout-status:
-      #           resource-name: deployment/demoapp
-      #           watch-rollout-status: true
-      #           watch-timeout: 3m
-      #           namespace: default
-      #     requires:
-      #       - create-deployment-linux
-      #     cluster: my-cluster
-      #     deployment: demoapp
-      #     container: app
-      #     image: my-image
-      #     tag: $CIRCLE_SHA1
-      #     namespace: default
-      #     dockerfile-name: tests/demoapp/Dockerfile
-      #     dockerfile-dir: /home/circleci/project/tests/demoapp
+      - gcp-gke/create-cluster:
+          name: create-cluster-linux
+          cluster: my-cluster
+      - gcp-gke/create-cluster:
+          name: create-cluster-windows
+          cluster: my-cluster-windows
+          additional-args: "--cluster-version=1.14 --enable-ip-alias --num-nodes=1"
+      - gcp-gke/create-node-pool:
+          name: create-node-pool-windows
+          node-pool: my-pool-windows
+          cluster: my-cluster-windows
+          additional-args: "--image-type=WINDOWS_SAC --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
+          requires:
+            - create-cluster-windows
+      - create-deployment-linux:
+          requires:
+            - create-cluster-linux
+          cluster-name: my-cluster
+          full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
+          docker-image-name: my-image
+          version-info: $CIRCLE_SHA1
+      - create-deployment-windows:
+          requires:
+            - create-node-pool-windows
+          cluster-name: my-cluster-windows
+      - gcp-gke/publish-and-rollout-image:
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+                namespace: default
+          requires:
+            - create-deployment-linux
+          cluster: my-cluster
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+          namespace: default
+          dockerfile-name: tests/demoapp/Dockerfile
+          dockerfile-dir: /home/circleci/project/tests/demoapp
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node-pool: my-pool-windows
           cluster: my-cluster-windows
-          # requires:
-          #   - create-deployment-windows
+          requires:
+            - create-deployment-windows
       - gcp-gke/delete-cluster:
           name: delete-cluster-linux
           cluster: my-cluster
-          # requires:
-          #   - gcp-gke/publish-and-rollout-image
+          requires:
+            - gcp-gke/publish-and-rollout-image
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: my-cluster-windows
-          # requires:
-          #   - delete-node-pool-windows
+          requires:
+            - delete-node-pool-windows
       - orb-tools/dev-promote-prod-from-commit-subject:
           orb-name: circleci/gcp-gke
           context: orb-publishing
