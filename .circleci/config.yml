@@ -10,7 +10,7 @@ orbs:
   orb-tools: circleci/orb-tools@9.0.0
   gcp-gke: circleci/gcp-gke@<<pipeline.parameters.dev-orb-version>>
   gcp-gcr: circleci/gcp-gcr@0.8.0
-  kubernetes: circleci/kubernetes@0.10.0
+  kubernetes: circleci/kubernetes@dev:alpha
 
 parameters:
   run-integration-tests:
@@ -54,6 +54,7 @@ jobs:
           tag: $CIRCLE_SHA1
           dockerfile: Dockerfile
           path: /home/circleci/project/tests/demoapp
+          docker-context: /home/circleci/project/tests/demoapp
       - gcp-gcr/push-image:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
@@ -61,6 +62,7 @@ jobs:
           resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
+
   create-deployment-windows:
     parameters:
       cluster-name:
@@ -81,6 +83,7 @@ jobs:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
           get-rollout-status: true
+          watch-timeout: 20m
       - run:
           name: Expose deployment via a service
           command: |
