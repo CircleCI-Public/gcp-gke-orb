@@ -83,8 +83,6 @@ jobs:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
           get-rollout-status: true
-          watch-timeout: 20m
-          step-timeout: 20m
       - run:
           name: Expose deployment via a service
           command: |
