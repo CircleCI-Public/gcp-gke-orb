@@ -62,7 +62,6 @@ jobs:
           resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
-          step-timeout: 20m
 
   create-deployment-windows:
     parameters:
@@ -84,6 +83,7 @@ jobs:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
           get-rollout-status: true
+          watch-timeout: 20m
           step-timeout: 20m
       - run:
           name: Expose deployment via a service
