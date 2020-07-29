@@ -5,7 +5,6 @@ metadata:
   labels:
     app: iis
 spec:
-  progressDeadlineSeconds: 1200
   replicas: 1
   selector:
     matchLabels:

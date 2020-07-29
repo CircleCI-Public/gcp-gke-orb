@@ -10,7 +10,7 @@ orbs:
   orb-tools: circleci/orb-tools@9.0.0
   gcp-gke: circleci/gcp-gke@<<pipeline.parameters.dev-orb-version>>
   gcp-gcr: circleci/gcp-gcr@0.8.0
-  kubernetes: circleci/kubernetes@dev:alpha
+  kubernetes: circleci/kubernetes@0.11.0
 
 parameters:
   run-integration-tests:
@@ -83,8 +83,6 @@ jobs:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
           get-rollout-status: true
-          watch-timeout: 20m
-          step-timeout: 20m
       - run:
           name: Expose deployment via a service
           command: |
