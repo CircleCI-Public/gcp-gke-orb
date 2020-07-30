@@ -7,5 +7,5 @@ display:
 
 orbs:
   gcloud: circleci/gcp-cli@1.8.3
-  gcr: circleci/gcp-gcr@0.6.1
-  k8s: circleci/kubernetes@0.10.0
+  gcr: circleci/gcp-gcr@0.8.0
+  k8s: circleci/kubernetes@0.11.0
