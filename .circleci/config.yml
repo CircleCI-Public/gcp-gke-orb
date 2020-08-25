@@ -9,8 +9,8 @@ orb_promotion_filters: &orb_promotion_filters
 orbs:
   orb-tools: circleci/orb-tools@9.0.0
   gcp-gke: circleci/gcp-gke@<<pipeline.parameters.dev-orb-version>>
-  gcp-gcr: circleci/gcp-gcr@0.6.1
-  kubernetes: circleci/kubernetes@0.10.0
+  gcp-gcr: circleci/gcp-gcr@0.8.0
+  kubernetes: circleci/kubernetes@0.11.0
 
 parameters:
   run-integration-tests:
@@ -52,8 +52,9 @@ jobs:
       - gcp-gcr/build-image:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
-          dockerfile: tests/demoapp/Dockerfile
+          dockerfile: Dockerfile
           path: /home/circleci/project/tests/demoapp
+          docker-context: /home/circleci/project/tests/demoapp
       - gcp-gcr/push-image:
           image: << parameters.docker-image-name >>
           tag: $CIRCLE_SHA1
@@ -61,6 +62,7 @@ jobs:
           resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
           resource-name: deployment/demoapp
+
   create-deployment-windows:
     parameters:
       cluster-name:
@@ -172,8 +174,9 @@ workflows:
           image: my-image
           tag: $CIRCLE_SHA1
           namespace: default
-          dockerfile-name: tests/demoapp/Dockerfile
+          dockerfile-name: Dockerfile
           dockerfile-dir: /home/circleci/project/tests/demoapp
+          docker-context: /home/circleci/project/tests/demoapp
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node-pool: my-pool-windows
