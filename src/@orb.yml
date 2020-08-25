@@ -1,9 +1,8 @@
 version: 2.1
-
 description: Google Kubernetes Engine (GKE) Orb
-
 display:
-  home_url: https://github.com/CircleCI-Public/gcp-gke-orb
+  home_url: https://cloud.google.com/kubernetes-engine
+  source_url: https://github.com/circleci-public/gcp-gke-orb
 
 orbs:
   gcloud: circleci/gcp-cli@1.8.3
