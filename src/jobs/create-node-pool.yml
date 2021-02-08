@@ -29,6 +29,10 @@ parameters:
     description: The Google compute zone to connect with via the gcloud CLI
     type: env_var_name
     default: GOOGLE_COMPUTE_ZONE
+  google-compute-region:
+    description: The Google compute region to connect with via the gcloud CLI
+    type: env_var_name
+    default: GOOGLE_COMPUTE_REGION
   additional-args:
     description: Additional arguments to "gcloud container node-pools create"
     type: string
@@ -53,5 +57,6 @@ steps:
       gcloud-service-key: <<parameters.gcloud-service-key>>
       google-project-id: <<parameters.google-project-id>>
       google-compute-zone: <<parameters.google-compute-zone>>
+      google-compute-region: <<parameters.google-compute-region>>
       additional-args: <<parameters.additional-args>>
       no-output-timeout: <<parameters.no-output-timeout>>
