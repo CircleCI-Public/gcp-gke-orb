@@ -11,6 +11,7 @@ The following environment variables need to be set in CircleCI either directly o
 - GCLOUD_SERVICE_KEY (required)
 - GOOGLE_PROJECT_ID
 - GOOGLE_COMPUTE_ZONE
+- GOOGLE_COMPUTE_REGION
 
 See [CircleCI Documentation](https://circleci.com/docs/2.0/env-vars) for instructions on how you would set this up.
 
