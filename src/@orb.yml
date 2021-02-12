@@ -5,6 +5,6 @@ display:
   source_url: https://github.com/circleci-public/gcp-gke-orb
 
 orbs:
-  gcloud: circleci/gcp-cli@1.8.3
-  gcr: circleci/gcp-gcr@0.8.0
+  gcloud: circleci/gcp-cli@2.1.0
+  gcr: circleci/gcp-gcr@0.13.0
   k8s: circleci/kubernetes@0.11.0
