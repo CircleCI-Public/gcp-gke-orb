@@ -197,7 +197,7 @@ workflows:
           orb-name: circleci/gcp-gke
           context: orb-publishing
           add-pr-comment: true
-          bot-user: cpe-bot
+          bot-user: orb-publisher
           bot-token-variable: GHI_TOKEN
           publish-version-tag: false
           fail-if-semver-not-indicated: false
@@ -218,7 +218,7 @@ workflows:
           context: orb-publishing
           orb-name: circleci/gcp-gke
           add-pr-comment: true
-          bot-user: cpe-bot
+          bot-user: orb-publisher
           bot-token-variable: GHI_TOKEN
           requires:
             - hold-for-approval
