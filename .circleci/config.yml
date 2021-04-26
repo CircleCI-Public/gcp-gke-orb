@@ -121,7 +121,7 @@ workflows:
 
       - orb-tools/publish-dev:
           orb-name: circleci/gcp-gke
-          context: orb-publishing
+          context: orb-publisher
           requires:
             - orb-tools/pack
 
@@ -195,7 +195,7 @@ workflows:
             - delete-node-pool-windows
       - orb-tools/dev-promote-prod-from-commit-subject:
           orb-name: circleci/gcp-gke
-          context: orb-publishing
+          context: orb-publisher
           add-pr-comment: true
           bot-user: orb-publisher
           bot-token-variable: GHI_TOKEN
@@ -215,7 +215,7 @@ workflows:
           type: approval
           filters: *orb_promotion_filters
       - orb-tools/dev-promote-prod-from-git-tag:
-          context: orb-publishing
+          context: orb-publisher
           orb-name: circleci/gcp-gke
           add-pr-comment: true
           bot-user: orb-publisher
