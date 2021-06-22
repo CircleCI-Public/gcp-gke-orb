@@ -140,7 +140,7 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: my-cluster-windows
-          additional-args: "--cluster-version=1.18 --enable-ip-alias --num-nodes=1"
+          additional-args: "--cluster-version=1.20 --enable-ip-alias --num-nodes=1"
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
           node-pool: my-pool-windows
