@@ -68,9 +68,9 @@ steps:
         GKE_PARAM_CLUSTER_NAME: <<parameters.cluster >>
       command: |
         if [ "$GKE_PARAM_ENABLE_AUTOPILOT" = "0" ]; then
-          PARAM_CLUSTER_CREATE = "create"
+          export PARAM_CLUSTER_CREATE="create"
         else
-          PARAM_CLUSTER_CREATE = "create-auto"
+          export PARAM_CLUSTER_CREATE="create-auto"
         fi
         gcloud container clusters "$PARAM_CLUSTER_CREATE" "$GKE_PARAM_CLUSTER_NAME" <<parameters.additional-args>>
       no_output_timeout: <<parameters.no-output-timeout>>
