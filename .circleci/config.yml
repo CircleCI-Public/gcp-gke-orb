@@ -137,6 +137,9 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: my-cluster
+      - gcp-gke/create-autopilot-cluster:
+          name: create-autopilot-cluster-linux
+          cluster: my-autopilot-cluster
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: my-cluster-windows
@@ -188,6 +191,11 @@ workflows:
           cluster: my-cluster
           requires:
             - gcp-gke/publish-and-rollout-image
+      - gcp-gke/delete-cluster:
+          name: delete-autopilot-cluster-linux
+          cluster: my-autopilot-cluster
+          requires:
+            - create-autopilot-cluster-linux
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: my-cluster-windows
