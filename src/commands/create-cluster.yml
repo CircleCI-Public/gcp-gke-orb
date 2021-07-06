@@ -2,6 +2,10 @@ description: >
   Creates a GKE cluster.
 
 parameters:
+  autopilot:
+    description: Create your GKE cluster in Autopilot mode. Autopilot clusters are managed and pre-configured with an optimised, production-ready cluster configuration.
+    type: boolean
+    default: false
   cluster:
     description: >
       Name of the GKE cluster to be created
@@ -59,6 +63,14 @@ steps:
             google-compute-region: <<parameters.google-compute-region>>
   - run:
       name: Create GKE cluster
+      environment:
+        GKE_PARAM_ENABLE_AUTOPILOT: <<parameters.autopilot>>
+        GKE_PARAM_CLUSTER_NAME: <<parameters.cluster >>
       command: |
-        gcloud container clusters create <<parameters.cluster >> <<parameters.additional-args>>
+        if [ "$GKE_PARAM_ENABLE_AUTOPILOT" = "0" ]; then
+          PARAM_CLUSTER_CREATE = "create"
+        else
+          PARAM_CLUSTER_CREATE = "create-auto"
+        fi
+        gcloud container clusters "$PARAM_CLUSTER_CREATE" "$GKE_PARAM_CLUSTER_NAME" <<parameters.additional-args>>
       no_output_timeout: <<parameters.no-output-timeout>>
