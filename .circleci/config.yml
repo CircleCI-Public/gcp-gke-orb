@@ -137,7 +137,7 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: my-cluster
-      - gcp-gke/create-autopilot-cluster:
+      - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: my-autopilot-cluster
       - gcp-gke/create-cluster:
