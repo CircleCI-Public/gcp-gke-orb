@@ -69,6 +69,11 @@ parameters:
       if using a Docker-based executor
     type: boolean
     default: true
+  remote-docker-version:
+    description: >
+      Setup a version for remote Docker engine.
+    default: 17.09.0-ce
+    type: string
   dry-run:
     default: none
     description: |
@@ -86,7 +91,8 @@ steps:
   - when:
       condition: <<parameters.use-remote-docker>>
       steps:
-          - setup_remote_docker
+          - setup_remote_docker:
+              version: <<parameters.use-remote-docker>>
   - checkout
   - gcr/gcr-auth:
       gcloud-service-key: <<parameters.gcloud-service-key>>
