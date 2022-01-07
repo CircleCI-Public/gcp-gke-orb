@@ -12,6 +12,7 @@ usage:
         # https://circleci.com/orbs/registry/orb/circleci/gcp-cli#commands-initialize
         - gke/create-cluster:
             cluster: gcp-testing
-        - run: gcloud container clusters list
+        - steps:
+            run: gcloud container clusters list
         - gke/delete-cluster:
             cluster: gcp-testing
