@@ -1,6 +1,6 @@
 description: >
   Create a GKE cluster.
-  
+
   Recommendation: Clusters created using this command are meant to be ephemeral. Therefore they must be deleted by the end of the pipeline.
 usage:
   version: 2.1
