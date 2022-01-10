@@ -1,5 +1,7 @@
 description: >
-  Create a GKE cluster
+  Create a GKE cluster.
+
+  Recommendation: Clusters created using this command are meant to be ephemeral. Therefore they must be deleted by the end of the pipeline.
 usage:
   version: 2.1
   orbs:
@@ -11,4 +13,8 @@ usage:
         # used by the circleci/gcp-cli orb's initialize command
         # https://circleci.com/orbs/registry/orb/circleci/gcp-cli#commands-initialize
         - gke/create-cluster:
+            cluster: gcp-testing
+        - steps:
+            run: gcloud container clusters list
+        - gke/delete-cluster:
             cluster: gcp-testing
