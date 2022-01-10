@@ -92,7 +92,7 @@ steps:
       condition: <<parameters.use-remote-docker>>
       steps:
           - setup_remote_docker:
-              version: <<parameters.use-remote-docker>>
+              version: <<parameters.remote-docker-version>>
   - checkout
   - gcr/gcr-auth:
       gcloud-service-key: <<parameters.gcloud-service-key>>
