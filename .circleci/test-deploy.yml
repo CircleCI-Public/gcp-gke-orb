@@ -114,7 +114,7 @@ workflows:
           name: create-node-pool-windows
           node-pool: my-pool-windows
           cluster: my-cluster-windows
-          additional-args: "--image-type=WINDOWS_SAC --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
+          additional-args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
           requires:
             - create-cluster-windows
       - create-deployment-linux:
