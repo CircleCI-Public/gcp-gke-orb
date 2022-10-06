@@ -64,13 +64,9 @@ steps:
   - run:
       name: Create GKE cluster
       environment:
-        GKE_PARAM_ENABLE_AUTOPILOT: <<parameters.autopilot>>
-        GKE_PARAM_CLUSTER_NAME: <<parameters.cluster >>
-      command: |
-        if [ "$GKE_PARAM_ENABLE_AUTOPILOT" = "0" ]; then
-          export PARAM_CLUSTER_CREATE="create"
-        else
-          export PARAM_CLUSTER_CREATE="create-auto"
-        fi
-        gcloud container clusters "$PARAM_CLUSTER_CREATE" "$GKE_PARAM_CLUSTER_NAME" <<parameters.additional-args>>
+        ORB_PARAM_ENABLE_AUTOPILOT: <<parameters.autopilot>>
+        ORB_PARAM_CLUSTER_NAME: <<parameters.cluster >>
+        ORB_PARAM_ADDITIONAL_ARGS: <<parameters.additional-args>>
+        SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+      command: <<include(scripts/create-cluster.sh)>>
       no_output_timeout: <<parameters.no-output-timeout>>
