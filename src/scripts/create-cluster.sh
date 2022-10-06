@@ -10,5 +10,6 @@ create_command="create"
 [ "$ORB_PARAM_ENABLE_AUTOPILOT" -eq 1 ] && create_command="create-auto"
 
 set -x
-gcloud container clusters "$create_command" "$ORB_PARAM_CLUSTER_NAME" "$ORB_PARAM_ADDITIONAL_ARGS"
+# shellcheck disable=SC2086 # We want to split the words.
+gcloud container clusters "$create_command" "$ORB_PARAM_CLUSTER_NAME" $ORB_PARAM_ADDITIONAL_ARGS
 set +x
