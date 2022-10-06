@@ -13,7 +13,7 @@
 #   expand_env_vars_with_prefix "PARAM_"
 #
 # Returns nothing.
-function expand_env_vars_with_prefix {
+expand_env_vars_with_prefix() {
   if [ "$#" -eq 0 ]; then
     printf '%s\n' "Please provide a prefix to filter the envinronment variables."
     return 1
