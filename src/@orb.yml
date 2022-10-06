@@ -1,10 +1,10 @@
 version: 2.1
-description: Google Kubernetes Engine (GKE) Orb
+description: Easily manage your Google Kubernetes Engine (GKE) clusters and node pools.
 display:
   home_url: https://cloud.google.com/kubernetes-engine
   source_url: https://github.com/circleci-public/gcp-gke-orb
 
 orbs:
   gcloud: circleci/gcp-cli@2.1.0
-  gcr: circleci/gcp-gcr@0.13.0
+  gcr: circleci/gcp-gcr@0.15
   k8s: circleci/kubernetes@0.11.0
