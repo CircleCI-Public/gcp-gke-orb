@@ -30,8 +30,8 @@ function expand_env_vars_with_prefix {
 
   while IFS= read -ra line; do
     # Split the line into key and value.
-    var_name=${line%%=*}
-    var_value=${line##*=}
+    var_value="${line#*=}"
+    var_name="${line%="$var_value"}"
 
     # Expand the value.
     expanded_value="$(eval echo "$var_value")"
