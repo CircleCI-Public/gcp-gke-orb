@@ -101,13 +101,13 @@ workflows:
   test-deploy:
     jobs:
       - gcp-gke/create-cluster:
-          name: create-cluster-linux
+          name: create-cluster-linux-${CIRCLE_WORKFLOW_ID}
           cluster: my-cluster
       - gcp-gke/create-cluster:
-          name: create-autopilot-cluster-linux
+          name: create-autopilot-cluster-linux-${CIRCLE_WORKFLOW_ID}
           cluster: my-autopilot-cluster
       - gcp-gke/create-cluster:
-          name: create-cluster-windows
+          name: create-cluster-windows-${CIRCLE_WORKFLOW_ID}
           cluster: my-cluster-windows
           additional-args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
       - gcp-gke/create-node-pool:
@@ -157,16 +157,19 @@ workflows:
           cluster: my-cluster
           requires:
             - gcp-gke/publish-and-rollout-image
+          when: always
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: my-autopilot-cluster
           requires:
             - create-autopilot-cluster-linux
+          when: always
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: my-cluster-windows
           requires:
             - delete-node-pool-windows
+          when: always
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:
