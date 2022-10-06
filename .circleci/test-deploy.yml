@@ -103,13 +103,16 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: my-cluster
+          filters: *filters
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: my-autopilot-cluster
+          filters: *filters
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: my-cluster-windows
           additional-args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
+          filters: *filters
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
           node-pool: my-pool-windows
@@ -117,6 +120,7 @@ workflows:
           additional-args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
           requires:
             - create-cluster-windows
+          filters: *filters
       - create-deployment-linux:
           requires:
             - create-cluster-linux
@@ -124,10 +128,12 @@ workflows:
           full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
           docker-image-name: my-image
           version-info: $CIRCLE_SHA1
+          filters: *filters
       - create-deployment-windows:
           requires:
             - create-node-pool-windows
           cluster-name: my-cluster-windows
+          filters: *filters
       - gcp-gke/publish-and-rollout-image:
           post-steps:
             - kubernetes/get-rollout-status:
@@ -146,27 +152,32 @@ workflows:
           dockerfile-name: Dockerfile
           dockerfile-dir: /home/circleci/project/tests/demoapp
           docker-context: /home/circleci/project/tests/demoapp
+          filters: *filters
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node-pool: my-pool-windows
           cluster: my-cluster-windows
           requires:
             - create-deployment-windows
+          filters: *filters
       - gcp-gke/delete-cluster:
           name: delete-cluster-linux
           cluster: my-cluster
           requires:
             - gcp-gke/publish-and-rollout-image
+          filters: *filters
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: my-autopilot-cluster
           requires:
             - create-autopilot-cluster-linux
+          filters: *filters
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: my-cluster-windows
           requires:
             - delete-node-pool-windows
+          filters: *filters
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:
