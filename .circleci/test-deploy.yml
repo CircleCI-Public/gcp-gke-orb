@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
-  orb-tools: circleci/orb-tools@11.3
+  orb-tools: circleci/orb-tools@11.4
   gcp-gcr: circleci/gcp-gcr@0.15
   kubernetes: circleci/kubernetes@0.11.0
 
@@ -12,7 +12,7 @@ filters: &filters
 pre-steps: 
   resolve-cluster-suffix: &resolve-cluster-suffix
     - run:
-        name: Resolve cluster name
+        name: Resolve cluster suffix
         command: |
           workflow_id_prefix="${CIRCLE_WORKFLOW_ID%-*}-"
           workflow_id_suffix="${CIRCLE_WORKFLOW_ID#"$workflow_id_prefix"}"
