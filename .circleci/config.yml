@@ -1,7 +1,7 @@
 version: 2.1
 setup: true
 orbs:
-  orb-tools: circleci/orb-tools@11.3
+  orb-tools: circleci/orb-tools@11.4
   shellcheck: circleci/shellcheck@3.1
 
 filters: &filters
@@ -16,7 +16,7 @@ workflows:
       - orb-tools/pack:
           filters: *filters
       - orb-tools/review:
-          exclude: RC009
+          max_command_length: 200
           filters: *filters
       - shellcheck/check:
           filters: *filters

@@ -1,13 +1,23 @@
 version: 2.1
 orbs:
   gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
-  orb-tools: circleci/orb-tools@11.3
+  orb-tools: circleci/orb-tools@11.4
   gcp-gcr: circleci/gcp-gcr@0.15
   kubernetes: circleci/kubernetes@0.11.0
 
 filters: &filters
   tags:
     only: /.*/
+
+pre-steps: 
+  resolve-cluster-suffix: &resolve-cluster-suffix
+    - run:
+        name: Resolve cluster suffix
+        command: |
+          workflow_id_prefix="${CIRCLE_WORKFLOW_ID%-*}-"
+          workflow_id_suffix="${CIRCLE_WORKFLOW_ID#"$workflow_id_prefix"}"
+          cluster_suffix="$workflow_id_suffix"
+          echo "export CLUSTER_SUFFIX=$cluster_suffix" >> "$BASH_ENV"
 
 jobs:
   create-deployment-linux:
@@ -102,38 +112,38 @@ workflows:
     jobs:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
-          cluster: my-cluster
-          filters: *filters
+          cluster: linux-$CLUSTER_SUFFIX
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
-          cluster: my-autopilot-cluster
-          filters: *filters
+          cluster: linux-autopilot-$CLUSTER_SUFFIX
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-cluster:
           name: create-cluster-windows
-          cluster: my-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
           additional-args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
           node-pool: my-pool-windows
-          cluster: my-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
           additional-args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
           requires:
             - create-cluster-windows
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - create-deployment-linux:
           requires:
             - create-cluster-linux
-          cluster-name: my-cluster
+          cluster-name: linux-$CLUSTER_SUFFIX
           full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
           docker-image-name: my-image
           version-info: $CIRCLE_SHA1
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - create-deployment-windows:
           requires:
             - create-node-pool-windows
-          cluster-name: my-cluster-windows
-          filters: *filters
+          cluster-name: windows-$CLUSTER_SUFFIX
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/publish-and-rollout-image:
           post-steps:
             - kubernetes/get-rollout-status:
@@ -143,7 +153,7 @@ workflows:
                 namespace: default
           requires:
             - create-deployment-linux
-          cluster: my-cluster
+          cluster: linux-$CLUSTER_SUFFIX
           deployment: demoapp
           container: app
           image: my-image
@@ -152,32 +162,32 @@ workflows:
           dockerfile-name: Dockerfile
           dockerfile-dir: /home/circleci/project/tests/demoapp
           docker-context: /home/circleci/project/tests/demoapp
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node-pool: my-pool-windows
-          cluster: my-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
           requires:
             - create-deployment-windows
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-cluster:
           name: delete-cluster-linux
-          cluster: my-cluster
+          cluster: linux-$CLUSTER_SUFFIX
           requires:
             - gcp-gke/publish-and-rollout-image
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
-          cluster: my-autopilot-cluster
+          cluster: linux-autopilot-$CLUSTER_SUFFIX
           requires:
             - create-autopilot-cluster-linux
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
-          cluster: my-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
           requires:
             - delete-node-pool-windows
-          filters: *filters
+          pre-steps: *resolve-cluster-suffix
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:

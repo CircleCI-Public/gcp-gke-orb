@@ -31,10 +31,12 @@ steps:
       cluster: <<parameters.cluster>>
   - run:
       name: Roll out image
-      command: |
-        DRY_RUN="<< parameters.dry-run >>"
-        if [ -n "<<parameters.namespace>>" ]; then
-          set -- "$@" --namespace="<<parameters.namespace>>"
-        fi
-        set -- "$@" "--dry-run=${DRY_RUN}"
-        kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>> "$@"
+      environment:
+        ORB_PARAM_DRY_RUN: << parameters.dry-run >>
+        ORB_PARAM_NAMESPACE: << parameters.namespace >>
+        ORB_PARAM_DEPLOYMENT: << parameters.deployment >>
+        ORB_PARAM_CONTAINER: << parameters.container >>
+        ORB_PARAM_IMAGE: << parameters.image >>
+        ORB_PARAM_TAG: << parameters.tag >>
+        SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+      command: <<include(scripts/rollout-image.sh)>>
