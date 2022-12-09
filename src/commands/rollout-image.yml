@@ -32,11 +32,11 @@ steps:
   - run:
       name: Roll out image
       environment:
-        ORB_PARAM_DRY_RUN: << parameters.dry-run >>
-        ORB_PARAM_NAMESPACE: << parameters.namespace >>
-        ORB_PARAM_DEPLOYMENT: << parameters.deployment >>
-        ORB_PARAM_CONTAINER: << parameters.container >>
-        ORB_PARAM_IMAGE: << parameters.image >>
-        ORB_PARAM_TAG: << parameters.tag >>
-        SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+        ORB_EVAL_DRY_RUN: << parameters.dry-run >>
+        ORB_EVAL_NAMESPACE: << parameters.namespace >>
+        ORB_EVAL_DEPLOYMENT: << parameters.deployment >>
+        ORB_EVAL_CONTAINER: << parameters.container >>
+        ORB_EVAL_IMAGE: << parameters.image >>
+        ORB_EVAL_TAG: << parameters.tag >>
+        ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
       command: <<include(scripts/rollout-image.sh)>>

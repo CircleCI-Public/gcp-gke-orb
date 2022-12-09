@@ -64,9 +64,9 @@ steps:
   - run:
       name: Create GKE cluster
       environment:
-        ORB_PARAM_ENABLE_AUTOPILOT: <<parameters.autopilot>>
-        ORB_PARAM_CLUSTER_NAME: <<parameters.cluster >>
-        ORB_PARAM_ADDITIONAL_ARGS: <<parameters.additional-args>>
-        SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+        ORB_EVAL_AUTOPILOT: <<parameters.autopilot>>
+        ORB_EVAL_CLUSTER: <<parameters.cluster >>
+        ORB_EVAL_ADDITIONAL_ARGS: <<parameters.additional-args>>
+        ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
       command: <<include(scripts/create-cluster.sh)>>
       no_output_timeout: <<parameters.no-output-timeout>>
