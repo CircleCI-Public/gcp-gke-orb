@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
-  orb-tools: circleci/orb-tools@11.4
+  orb-tools: circleci/orb-tools@11.5
   gcp-gcr: circleci/gcp-gcr@0.15
   kubernetes: circleci/kubernetes@0.11.0
 
@@ -9,7 +9,7 @@ filters: &filters
   tags:
     only: /.*/
 
-pre-steps: 
+pre-steps:
   resolve-cluster-suffix: &resolve-cluster-suffix
     - run:
         name: Resolve cluster suffix
@@ -204,3 +204,5 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+# VS Code Extension Version: 1.4.0
