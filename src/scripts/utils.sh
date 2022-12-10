@@ -61,7 +61,7 @@ check_kubectl_status() {
     printf '%s\n' "Example:"
     printf '%s\n' "- gcp-cli/install:"
     printf '\t%s\n' "components: kubectl"
-    return 11
+    return 1
   fi
 }
 
