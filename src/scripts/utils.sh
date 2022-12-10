@@ -66,6 +66,10 @@ check_kubectl_status() {
 }
 
 check_auth_plugin_status() {
+  # If the user has explicitly set the USE_GKE_GCLOUD_AUTH_PLUGIN to False,
+  # then we don't need to check if the plugin is installed.
+  [ "$USE_GKE_GCLOUD_AUTH_PLUGIN" = "False" ] && return 0
+
   if gcloud components list --filter=gke-gcloud-auth-plugin --limit=1 | grep -q "Not Installed"; then
     >&2 printf '%s\n' "gke-gcloud-auth-plugin is not installed."
     printf '%s\n' "You can install it as a component using the gcp-cli orb."
