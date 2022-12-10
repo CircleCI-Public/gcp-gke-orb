@@ -24,6 +24,10 @@ parameters:
 steps:
   - run:
       name: Create node pool
-      command: |
-        gcloud container node-pools create <<parameters.node_pool>> --cluster <<parameters.cluster >> <<parameters.additional_args>>
+      environment:
+        ORB_EVAL_NODE_POOL: <<parameters.autopilot>>
+        ORB_EVAL_CLUSTER: <<parameters.cluster >>
+        ORB_EVAL_ADDITIONAL_ARGS: << parameters.additional_args >>
+        ORB_SCRIPT_UTILS: << include(scripts/utils.sh) >>
+      command: <<include(scripts/create-node-pool.sh)>>
       no_output_timeout: <<parameters.no_output_timeout>>
