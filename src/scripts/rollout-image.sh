@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Import "utils.sh".
 eval "$ORB_SCRIPT_UTILS"
+check_kubectl_status || exit $?
 expand_env_vars_with_prefix "ORB_EVAL_"
 
 build_args=(
