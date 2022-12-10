@@ -8,32 +8,11 @@ parameters:
     description: >
       Name of the GKE cluster to be deleted
     type: string
-  perform-login:
-    description: >
-        Whether to perform a login with the gcloud CLI.
-    type: boolean
-    default: false
-  gcloud-service-key:
-    description: The gcloud service key
-    type: env_var_name
-    default: GCLOUD_SERVICE_KEY
-  google-project-id:
-    description: The Google project ID to connect with via the gcloud CLI
-    type: env_var_name
-    default: GOOGLE_PROJECT_ID
-  google-compute-zone:
-    description: The Google compute zone to connect with via the gcloud CLI
-    type: env_var_name
-    default: GOOGLE_COMPUTE_ZONE
-  google-compute-region:
-    description: The Google compute region to connect with via the gcloud CLI
-    type: env_var_name
-    default: GOOGLE_COMPUTE_REGION
-  additional-args:
+  additional_args:
     description: Additional arguments to "gcloud container clusters delete"
     type: string
     default: ""
-  no-output-timeout:
+  no_output_timeout:
     description: >
       Elapsed time that the cluster deletion command can run on CircleCI without output.
       The string is a decimal with unit suffix, such as “20m”, “1.25h”, “5s”
@@ -48,10 +27,5 @@ parameters:
 steps:
   - delete-cluster:
       cluster: <<parameters.cluster>>
-      perform-login: true
-      gcloud-service-key: <<parameters.gcloud-service-key>>
-      google-project-id: <<parameters.google-project-id>>
-      google-compute-zone: <<parameters.google-compute-zone>>
-      google-compute-region: <<parameters.google-compute-region>>
-      additional-args: <<parameters.additional-args>>
-      no-output-timeout: <<parameters.no-output-timeout>>
+      additional_args: <<parameters.additional_args>>
+      no_output_timeout: <<parameters.no_output_timeout>>
