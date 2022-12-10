@@ -1,8 +1,5 @@
 description: "Update a deployment's Docker image."
 parameters:
-  cluster:
-    description: "The Kubernetes cluster name."
-    type: string
   deployment:
     description: "The Kubernetes deployment name."
     type: string
