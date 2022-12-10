@@ -42,7 +42,39 @@ expand_env_vars_with_prefix() {
     # The -v option assignes the output to a variable rather than printing it.
     printf -v "$var_name" "%s" "$expanded_value"
   done <<< "$env_vars"
-  return 0
+}
+
+check_gcloud_status() {
+  if ! command -v gcloud > /dev/null 2>&1; then
+    >&2 printf '%s\n' "gcloud is not installed."
+    printf '%s\n' "You can install and set it up using the the gcp-cli orb."
+    printf '%s\n' "https://circleci.com/developer/orbs/orb/circleci/gcp-cli#commands-setup"
+    return 1
+  fi
+}
+
+check_kubectl_status() {
+  if ! command -v kubectl > /dev/null 2>&1; then
+    >&2 printf '%s\n' "kubectl is not installed."
+    printf '%s\n' "You can install it as a component using the gcp-cli orb."
+    printf '%s\n' "https://circleci.com/developer/orbs/orb/circleci/gcp-cli#commands-install."
+    printf '%s\n' "Example:"
+    printf '%s\n' "- gcp-cli/install:"
+    printf '\t%s\n' "components: kubectl"
+    return 11
+  fi
+}
+
+check_auth_plugin_status() {
+  if gcloud components list --filter=gke-gcloud-auth-plugin --limit=1 | grep -q "Not Installed"; then
+    >&2 printf '%s\n' "gke-gcloud-auth-plugin is not installed."
+    printf '%s\n' "You can install it as a component using the gcp-cli orb."
+    printf '%s\n' "https://circleci.com/developer/orbs/orb/circleci/gcp-cli#commands-install."
+    printf '%s\n' "Example:"
+    printf '%s\n' "- gcp-cli/install:"
+    printf '\t%s\n' "components: gke-gcloud-auth-plugin"
+    return 1
+  fi
 }
 
 export CIRCLECI_BASE_DIR="${CIRCLE_WORKING_DIRECTORY/\~/$HOME}"
