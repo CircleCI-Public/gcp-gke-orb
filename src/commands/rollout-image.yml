@@ -20,19 +20,19 @@ parameters:
     description: "The Kubernetes namespace name."
     type: string
     default: ""
-  dry-run:
+  dry_run:
     default: none
     description: |
-      Must be "none", "server", or "client". If client strategy, only print the object that would be sent, without sending it. If server strategy, submit server-side request without persisting the resource.
+      Must be "none", "server", or "client".
+      If client strategy, only print the object that would be sent, without sending it.
+      If server strategy, submit server-side request without persisting the resource.
     type: enum
     enum: ["none", "server", "client"]
 steps:
-  - update-kubeconfig-with-credentials:
-      cluster: <<parameters.cluster>>
   - run:
       name: Roll out image
       environment:
-        ORB_EVAL_DRY_RUN: << parameters.dry-run >>
+        ORB_EVAL_DRY_RUN: << parameters.dry_run >>
         ORB_EVAL_NAMESPACE: << parameters.namespace >>
         ORB_EVAL_DEPLOYMENT: << parameters.deployment >>
         ORB_EVAL_CONTAINER: << parameters.container >>
