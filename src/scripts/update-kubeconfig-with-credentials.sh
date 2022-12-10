@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
+[ "$ORB_VAL_USE_GKE_GCLOUD_AUTH_PLUGIN" -eq 0 ] && export USE_GKE_GCLOUD_AUTH_PLUGIN=False
+[ "$ORB_VAL_USE_GKE_GCLOUD_AUTH_PLUGIN" -eq 1 ] && export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
 eval "$ORB_SCRIPT_UTILS"
+expand_env_vars_with_prefix "ORB_EVAL_"
 check_gcloud_status || exit $?
 check_auth_plugin_status || exit $?
-expand_env_vars_with_prefix "ORB_EVAL_"
-
-# https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
-if [ -z "$USE_GKE_GCLOUD_AUTH_PLUGIN" ] || [ "$USE_GKE_GCLOUD_AUTH_PLUGIN" != "False" ]; then
- export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-fi
 
 set -x
 # shellcheck disable=SC2086
