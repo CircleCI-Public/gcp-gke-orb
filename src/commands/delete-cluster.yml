@@ -20,6 +20,9 @@ parameters:
 steps:
   - run:
       name: Delete GKE cluster
-      command: |
-        gcloud container clusters delete <<parameters.cluster>> --quiet <<parameters.additional_args>>
+      environment:
+        ORB_EVAL_CLUSTER: <<parameters.cluster>>
+        ORB_EVAL_ADDITIONAL_ARGS: <<parameters.additional_args>>
+        ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+      command: <<include(scripts/delete-cluster.sh)>>
       no_output_timeout: <<parameters.no_output_timeout>>
