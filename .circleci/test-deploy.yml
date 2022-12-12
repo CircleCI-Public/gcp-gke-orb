@@ -19,6 +19,10 @@ pre-steps:
           workflow_id_suffix="${CIRCLE_WORKFLOW_ID#"$workflow_id_prefix"}"
           cluster_suffix="$workflow_id_suffix"
           echo "export CLUSTER_SUFFIX=$cluster_suffix" >> "$BASH_ENV"
+  install-and-setup-gcloud: &install-and-setup-gcloud
+    - gcp-cli/install:
+        components: "gke-gcloud-auth-plugin kubectl"
+    - gcp-cli/setup
 
 jobs:
   create-deployment-linux:
@@ -71,6 +75,9 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - gcp-cli/install:
+          components: "gke-gcloud-auth-plugin kubectl"
+      - gcp-cli/setup
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
       - run:
@@ -113,18 +120,23 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
-          autopilot: true
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
           autopilot: true
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
           additional_args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
           node_pool: my-pool-windows
@@ -132,7 +144,9 @@ workflows:
           additional_args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
           requires:
             - create-cluster-windows
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - create-deployment-linux:
           requires:
             - create-cluster-linux
@@ -140,12 +154,16 @@ workflows:
           full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
           docker-image-name: my-image
           version-info: $CIRCLE_SHA1
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - create-deployment-windows:
           requires:
             - create-node-pool-windows
           cluster-name: windows-$CLUSTER_SUFFIX
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       # - gcp-gke/publish-and-rollout-image:
       #     post-steps:
       #       - kubernetes/get-rollout-status:
@@ -171,25 +189,33 @@ workflows:
           cluster: windows-$CLUSTER_SUFFIX
           requires:
             - create-deployment-windows
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/delete-cluster:
-          name: delete-cluspublish-and-rollout-imageer-linux
+          name: delete-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
-          # requires:
-          #   - gcp-gke/publish-and-rollout-image
-          pre-steps: *resolve-cluster-suffix
+          requires:
+            - create-deployment-linux
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
           requires:
             - create-autopilot-cluster-linux
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
           requires:
             - delete-node-pool-windows
-          pre-steps: *resolve-cluster-suffix
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:
