@@ -4,7 +4,7 @@ orbs:
   orb-tools: circleci/orb-tools@11.5
   gcp-cli: circleci/gcp-cli@dev:37373cb57afcb0459f05a87e4ab7e110ab8756ee
   gcp-gcr: circleci/gcp-gcr@0.15
-  kubernetes: circleci/kubernetes@0.11.0
+  kubernetes: circleci/kubernetes@1.3.1
 
 filters: &filters
   tags:
@@ -20,9 +20,8 @@ pre-steps:
           cluster_suffix="$workflow_id_suffix"
           echo "export CLUSTER_SUFFIX=$cluster_suffix" >> "$BASH_ENV"
   install-and-setup-gcloud: &install-and-setup-gcloud
-    - gcp-cli/install:
+    - gcp-cli/setup:
         components: "gke-gcloud-auth-plugin kubectl"
-    - gcp-cli/setup
 
 jobs:
   create-deployment-linux:
@@ -39,9 +38,8 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - gcp-cli/install:
+      - gcp-cli/setup:
           components: "gke-gcloud-auth-plugin kubectl"
-      - gcp-cli/setup
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
       - run:
@@ -66,6 +64,7 @@ jobs:
       - kubernetes/create-or-update-resource:
           resource-file-path: "tests/demoapp/deployment.yaml"
           get-rollout-status: true
+          watch-timeout: 1h
           resource-name: deployment/demoapp
   create-deployment-windows:
     parameters:
@@ -75,9 +74,8 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - gcp-cli/install:
+      - gcp-cli/setup:
           components: "gke-gcloud-auth-plugin kubectl"
-      - gcp-cli/setup
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
       - run:
@@ -88,6 +86,7 @@ jobs:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
           get-rollout-status: true
+          watch-timeout: 1h
       - run:
           name: Expose deployment via a service
           command: |
