@@ -2,9 +2,9 @@ version: 2.1
 orbs:
   gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
   orb-tools: circleci/orb-tools@11.5
-  gcp-cli: circleci/gcp-cli@dev:37373cb57afcb0459f05a87e4ab7e110ab8756ee
+  gcp-cli: circleci/gcp-cli@3.0
   gcp-gcr: circleci/gcp-gcr@0.15
-  kubernetes: circleci/kubernetes@1.3.1
+  kubernetes: circleci/kubernetes@1.3
 
 filters: &filters
   tags:

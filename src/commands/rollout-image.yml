@@ -1,4 +1,6 @@
-description: "Update a deployment's Docker image."
+description: >
+  "Update a deployment's Docker image."
+
 parameters:
   deployment:
     description: "The Kubernetes deployment name."
@@ -25,6 +27,7 @@ parameters:
       If server strategy, submit server-side request without persisting the resource.
     type: enum
     enum: ["none", "server", "client"]
+
 steps:
   - run:
       name: Roll out image

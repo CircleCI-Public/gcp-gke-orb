@@ -70,7 +70,14 @@ check_auth_plugin_status() {
   # then we don't need to check if the plugin is installed.
   [ "$USE_GKE_GCLOUD_AUTH_PLUGIN" = "False" ] && return 0
 
-  if gcloud components list --filter=gke-gcloud-auth-plugin --limit=1 | grep -q "Not Installed"; then
+
+  # gcloud writes its entire output to stdout even if its piped to grep.
+  # So we need to redirect the output to a file and then grep it.
+  local components_list
+  components_list="$(mktemp)"
+  gcloud components list --filter=gke-gcloud-auth-plugin --limit=1 &> "$components_list"
+
+  if grep -q "Not Installed" "$components_list"; then
     >&2 printf '%s\n' "gke-gcloud-auth-plugin is not installed."
     printf '%s\n' "You can install it as a component using the gcp-cli orb."
     printf '%s\n' "https://circleci.com/developer/orbs/orb/circleci/gcp-cli#commands-install."
