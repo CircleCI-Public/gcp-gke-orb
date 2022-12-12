@@ -173,10 +173,10 @@ workflows:
             - create-deployment-windows
           pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-cluster:
-          name: delete-cluster-linux
+          name: delete-cluspublish-and-rollout-imageer-linux
           cluster: linux-$CLUSTER_SUFFIX
-          requires:
-            - gcp-gke/publish-and-rollout-image
+          # requires:
+          #   - gcp-gke/publish-and-rollout-image
           pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
