@@ -127,6 +127,7 @@ workflows:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
           autopilot: true
+          additional_args: "--region=us-central1"
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
