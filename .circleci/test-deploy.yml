@@ -207,6 +207,7 @@ workflows:
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
+          additional_args: "--region=us-central1"
           requires:
             - create-autopilot-cluster-linux
           pre-steps:
