@@ -120,12 +120,14 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
+          no_output_timeout: 20m
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
+          no_output_timeout: 20m
           autopilot: true
           additional_args: "--region=us-central1"
           pre-steps:
@@ -134,6 +136,7 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
+          no_output_timeout: 20m
           additional_args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
           pre-steps:
             - *resolve-cluster-suffix
