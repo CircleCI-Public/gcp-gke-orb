@@ -85,8 +85,12 @@ jobs:
       - kubernetes/create-or-update-resource:
           resource-file-path: "tests/windows-iis/deployment.yaml"
           resource-name: "deployment/iis"
-          get-rollout-status: true
-          watch-timeout: 1h
+      - run:
+          name: Show the resource rollout status
+          command: |
+            set -x
+            kubectl rollout status -f "tests/windows-iis/deployment.yaml" --timeout=1h
+            set +x
       - run:
           name: Expose deployment via a service
           command: |
