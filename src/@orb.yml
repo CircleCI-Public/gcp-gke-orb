@@ -3,3 +3,7 @@ description: Easily manage your Google Kubernetes Engine (GKE) clusters and node
 display:
   home_url: https://circleci.com/developer/orbs/orb/circleci/gcp-gke
   source_url: https://github.com/circleci-public/gcp-gke-orb
+
+orbs:
+  gcp-cli: circleci/gcp-cli@3.0
+  gcp-gcr: circleci/gcp-gcr@0.15

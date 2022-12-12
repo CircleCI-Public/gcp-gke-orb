@@ -168,25 +168,26 @@ workflows:
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
-      # - gcp-gke/publish-and-rollout-image:
-      #     post-steps:
-      #       - kubernetes/get-rollout-status:
-      #           resource-name: deployment/demoapp
-      #           watch-rollout-status: true
-      #           watch-timeout: 3m
-      #           namespace: default
-      #     requires:
-      #       - create-deployment-linux
-      #     cluster: linux-$CLUSTER_SUFFIX
-      #     deployment: demoapp
-      #     container: app
-      #     image: my-image
-      #     tag: $CIRCLE_SHA1
-      #     namespace: default
-      #     dockerfile-name: Dockerfile
-      #     dockerfile-dir: /home/circleci/project/tests/demoapp
-      #     docker-context: /home/circleci/project/tests/demoapp
-      #     pre-steps: *resolve-cluster-suffix
+      - gcp-gke/publish-and-rollout-image:
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+                namespace: default
+          requires:
+            - create-deployment-linux
+          cluster: linux-$CLUSTER_SUFFIX
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+          namespace: default
+          dockerfile_name: Dockerfile
+          dockerfile_dir: /home/circleci/project/tests/demoapp
+          docker_context: /home/circleci/project/tests/demoapp
+          pre-steps:
+            - *resolve-cluster-suffix
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node_pool: my-pool-windows
@@ -200,7 +201,7 @@ workflows:
           name: delete-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
           requires:
-            - create-deployment-linux
+            - gcp-gke/publish-and-rollout-image
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud

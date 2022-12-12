@@ -1,0 +1,187 @@
+
+description: "Update cluster with new Docker image."
+executor: <<parameters.executor>>
+parameters:
+  cluster:
+    description: "The Kubernetes cluster name."
+    type: string
+  deployment:
+    description: "The Kubernetes deployment name."
+    type: string
+  container:
+    description: "The Kubernetes container name."
+    type: string
+  registry_url:
+    description: The GCR registry URL from ['', us, eu, asia].gcr.io
+    type: string
+    default: gcr.io
+  image:
+    description: A name for your docker image
+    type: string
+  tag:
+    description: A docker image tag
+    type: string
+    default: "latest"
+  namespace:
+    description: "The Kubernetes namespace name."
+    type: string
+    default: ""
+  dockerfile_dir:
+    description: >
+        Path to the directory containing your Dockerfile,
+        defaults to . (working directory)
+    type: string
+    default: .
+  dockerfile_name:
+    description: 'Name of dockerfile to use, defaults to Dockerfile'
+    type: string
+    default: Dockerfile
+  extra_build_args:
+    description: >
+      Extra flags to pass to docker build. For examples, see
+      https://docs.docker.com/engine/reference/commandline/build
+    type: string
+    default: ''
+  executor:
+    description: >
+        Executor to use for this job
+    type: executor
+    default: default
+  use_remote_docker:
+    description: >
+      Setup a remote Docker engine for Docker commands? Only required
+      if using a Docker-based executor
+    type: boolean
+    default: true
+  remote_docker_version:
+    description: >
+      Setup a version for remote Docker engine.
+      If left blank, the latest version will be used.
+    default: ""
+    type: string
+  dry_run:
+    default: none
+    description: |
+      Used for image rollout. Must be "none", "server", or "client". If client strategy, only print the object that would be sent, without sending it.
+      If server strategy, submit server-side request without persisting the resource.
+    type: enum
+    enum: ["none", "server", "client"]
+  docker_context:
+    type: string
+    default: .
+    description: >
+      Path to the directory containing your build context, defaults to .
+      (working directory)
+  # CLI parameters
+  gcloud_service_key:
+    type: env_var_name
+    default: GCLOUD_SERVICE_KEY
+    description: |
+      Name of environment variable storing the full service key JSON file
+      for the Google project.
+  google_project_id:
+    type: env_var_name
+    default: GOOGLE_PROJECT_ID
+    description: |
+      Name of environment variable storing the Google project ID to set as
+      default for the gcloud CLI.
+  google_compute_zone:
+    type: env_var_name
+    default: GOOGLE_COMPUTE_ZONE
+    description: |
+      Name of environment variable storing the Google compute zone to set as
+      default for the gcloud CLI.
+  google_compute_region:
+    type: env_var_name
+    default: GOOGLE_COMPUTE_REGION
+    description: |
+      Name of environment variable storing the Google compute region to set as
+      default for the gcloud CLI.
+  # OIDC parameters
+  use_oidc:
+    type: boolean
+    default: false
+    description: Set to true to enable OIDC
+  google_project_number:
+    type: env_var_name
+    default: GOOGLE_PROJECT_NUMBER
+    description: |
+      Name of environment variable storing the Google project number
+      used to configure OIDC.
+  workload_identity_pool_id:
+    type: env_var_name
+    default: OIDC_WIP_ID
+    description: |
+      Environment variable containing OIDC configured workload identity pool is stored.
+  workload_identity_pool_provider_id:
+    type: env_var_name
+    default: OIDC_WIP_PROVIDER_ID
+    description: |
+      Environment variable containing OIDC configured workload identity pool provider ID is stored.
+  service_account_email:
+    type: env_var_name
+    default: OIDC_SERVICE_ACCOUNT_EMAIL
+    description: Environment variable containing OIDC service account email.
+  gcp_cred_config_file_path:
+    type: string
+    default: ~/gcp_cred_config.json
+    description: Output location of OIDC credentials.
+
+steps:
+  - when:
+      condition: <<parameters.use_remote_docker>>
+      steps:
+          - when:
+              condition: <<parameters.remote_docker_version>>
+              steps:
+                - setup_remote_docker:
+                    version: <<parameters.remote_docker_version>>
+          - unless:
+              condition: <<parameters.remote_docker_version>>
+              steps:
+                - setup_remote_docker
+  - checkout
+  - gcp-cli/setup:
+      components: "gke-gcloud-auth-plugin kubectl"
+      gcloud_service_key: <<parameters.gcloud_service_key>>
+      google_project_id: <<parameters.google_project_id>>
+      google_compute_zone: <<parameters.google_compute_zone>>
+      google_compute_region: <<parameters.google_compute_region>>
+      use_oidc: <<parameters.use_oidc>>
+      google_project_number: <<parameters.google_project_number>>
+      workload_identity_pool_id: <<parameters.workload_identity_pool_id>>
+      workload_identity_pool_provider_id: <<parameters.workload_identity_pool_provider_id>>
+      service_account_email: <<parameters.service_account_email>>
+      gcp_cred_config_file_path: <<parameters.gcp_cred_config_file_path>>
+  # replace the command below with gcp-gcr/auth once it's refactored.
+  - run:
+      name: "Configure Docker to use gcloud as a credential helper"
+      command: |
+        set -x
+        project_id_var_name="<<parameters.google_project_id>>"
+        gcloud auth configure-docker --quiet --project "${!project_id_var_name}" <<parameters.registry_url>>
+        set +x
+  - gcp-gcr/build-image:
+      registry-url: <<parameters.registry_url>>
+      google-project-id: <<parameters.google_project_id>>
+      image: <<parameters.image>>
+      tag: << parameters.tag >>
+      path: <<parameters.dockerfile_dir>>
+      dockerfile: <<parameters.dockerfile_name>>
+      docker-context: <<parameters.docker_context>>
+      extra_build_args: <<parameters.extra_build_args>>
+  - gcp-gcr/push-image:
+      registry-url: <<parameters.registry_url>>
+      google-project-id: <<parameters.google_project_id>>
+      image: <<parameters.image>>
+      tag: <<parameters.tag>>
+  - update-kubeconfig-with-credentials:
+      cluster: "<<parameters.cluster>>"
+      use_gke_cloud_auth_plugin: true
+  - rollout-image:
+      deployment: "<<parameters.deployment>>"
+      container: "<<parameters.container>>"
+      image: "<<parameters.registry_url>>/$<<parameters.google_project_id>>/<<parameters.image>>"
+      tag: "<<parameters.tag>>"
+      namespace: "<<parameters.namespace>>"
+      dry_run: "<<parameters.dry_run>>"
