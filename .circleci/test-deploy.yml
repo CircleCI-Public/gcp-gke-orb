@@ -2,6 +2,7 @@ version: 2.1
 orbs:
   gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
   orb-tools: circleci/orb-tools@11.5
+  gcp-cli: circleci/gcp-cli@3.0.0
   gcp-gcr: circleci/gcp-gcr@0.15
   kubernetes: circleci/kubernetes@0.11.0
 
@@ -34,10 +35,11 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - gcp-cli/install:
+          components: "gke-gcloud-auth-plugin kubectl"
+      - gcp-cli/setup
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
-          perform-login: true
-          install-kubectl: true
       - run:
           name: Create deployment manifest
           command: |
@@ -71,8 +73,6 @@ jobs:
       - checkout
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
-          perform-login: true
-          install-kubectl: true
       - run:
           name: Check cluster initialization
           command: |
@@ -113,21 +113,23 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
+          autopilot: true
           pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
+          autopilot: true
           pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
-          additional-args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
+          additional_args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
           pre-steps: *resolve-cluster-suffix
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
-          node-pool: my-pool-windows
+          node_pool: my-pool-windows
           cluster: windows-$CLUSTER_SUFFIX
-          additional-args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
+          additional_args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1"
           requires:
             - create-cluster-windows
           pre-steps: *resolve-cluster-suffix
@@ -144,28 +146,28 @@ workflows:
             - create-node-pool-windows
           cluster-name: windows-$CLUSTER_SUFFIX
           pre-steps: *resolve-cluster-suffix
-      - gcp-gke/publish-and-rollout-image:
-          post-steps:
-            - kubernetes/get-rollout-status:
-                resource-name: deployment/demoapp
-                watch-rollout-status: true
-                watch-timeout: 3m
-                namespace: default
-          requires:
-            - create-deployment-linux
-          cluster: linux-$CLUSTER_SUFFIX
-          deployment: demoapp
-          container: app
-          image: my-image
-          tag: $CIRCLE_SHA1
-          namespace: default
-          dockerfile-name: Dockerfile
-          dockerfile-dir: /home/circleci/project/tests/demoapp
-          docker-context: /home/circleci/project/tests/demoapp
-          pre-steps: *resolve-cluster-suffix
+      # - gcp-gke/publish-and-rollout-image:
+      #     post-steps:
+      #       - kubernetes/get-rollout-status:
+      #           resource-name: deployment/demoapp
+      #           watch-rollout-status: true
+      #           watch-timeout: 3m
+      #           namespace: default
+      #     requires:
+      #       - create-deployment-linux
+      #     cluster: linux-$CLUSTER_SUFFIX
+      #     deployment: demoapp
+      #     container: app
+      #     image: my-image
+      #     tag: $CIRCLE_SHA1
+      #     namespace: default
+      #     dockerfile-name: Dockerfile
+      #     dockerfile-dir: /home/circleci/project/tests/demoapp
+      #     docker-context: /home/circleci/project/tests/demoapp
+      #     pre-steps: *resolve-cluster-suffix
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
-          node-pool: my-pool-windows
+          node_pool: my-pool-windows
           cluster: windows-$CLUSTER_SUFFIX
           requires:
             - create-deployment-windows

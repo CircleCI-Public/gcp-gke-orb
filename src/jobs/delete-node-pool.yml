@@ -4,7 +4,7 @@ description: >
 executor: <<parameters.executor>>
 
 parameters:
-  node-pool:
+  node_pool:
     description: >
       Name of the node pool to be deleted
     type: string

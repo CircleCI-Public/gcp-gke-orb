@@ -25,7 +25,7 @@ steps:
   - run:
       name: Delete node pool
       environment:
-        ORB_EVAL_NODE_POOL: <<parameters.autopilot>>
+        ORB_EVAL_NODE_POOL: <<parameters.node_pool>>
         ORB_EVAL_CLUSTER: <<parameters.cluster >>
         ORB_EVAL_ADDITIONAL_ARGS: <<parameters.additional_args>>
         ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
