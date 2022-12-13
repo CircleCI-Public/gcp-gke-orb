@@ -31,12 +31,16 @@ jobs:
         type: string
       version-info:
         type: string
+      use_oidc:
+        type: boolean
+        default: false
     executor: gcp-gke/default
     steps:
       - setup_remote_docker
       - checkout
       - gcp-cli/setup:
           components: "gke-gcloud-auth-plugin kubectl"
+          use_oidc: <<parameters.use_oidc>>
       - gcp-gke/update-kubeconfig-with-credentials:
           cluster: <<parameters.cluster-name>>
       - run:
