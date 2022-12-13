@@ -138,6 +138,7 @@ workflows:
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud-oidc
+          context: gcp-cli-oidc
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
@@ -187,6 +188,7 @@ workflows:
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud-oidc
+          context: gcp-cli-oidc
       - create-deployment-windows:
           requires:
             - create-node-pool-windows
@@ -237,6 +239,7 @@ workflows:
           docker_context: /home/circleci/project/tests/demoapp
           pre-steps:
             - *resolve-cluster-suffix
+          context: gcp-cli-oidc
       - gcp-gke/delete-node-pool:
           name: delete-node-pool-windows
           node_pool: my-pool-windows
@@ -262,6 +265,7 @@ workflows:
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud-oidc
+          context: gcp-cli-oidc
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
