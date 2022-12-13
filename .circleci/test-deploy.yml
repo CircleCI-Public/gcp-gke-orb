@@ -152,7 +152,7 @@ workflows:
           name: create-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
           no_output_timeout: 30m
-          additional_args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
+          additional_args: "--release-channel=regular --enable-ip-alias --num-nodes=1 --region=us-central1"
           pre-steps: *resolve-cluster-suffix
           context: cpe-gcp
       - gcp-gke/create-node-pool:
