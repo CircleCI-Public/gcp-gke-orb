@@ -29,7 +29,7 @@ parameters:
     default: GCLOUD_SERVICE_KEY
     description: |
       Name of environment variable storing the full service key JSON file for the Google project.
-      Required if "use_oidc" is set to false.
+      Only required if not using OIDC i.e. "use_oidc" is false.
   google_project_id:
     type: env_var_name
     default: GOOGLE_PROJECT_ID
