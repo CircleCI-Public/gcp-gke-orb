@@ -92,6 +92,7 @@ jobs:
             set -x
             kubectl rollout status -f "tests/windows-iis/deployment.yaml" --timeout=1h
             set +x
+          no_output_timeout: 1h
       - run:
           name: Expose deployment via a service
           command: |
