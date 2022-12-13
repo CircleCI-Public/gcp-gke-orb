@@ -22,6 +22,10 @@ pre-steps:
   install-and-setup-gcloud: &install-and-setup-gcloud
     - gcp-cli/setup:
         components: "gke-gcloud-auth-plugin kubectl"
+  install-and-setup-gcloud-oidc: &install-and-setup-gcloud-oidc
+    - gcp-cli/setup:
+        use_oidc: true
+        components: "gke-gcloud-auth-plugin kubectl"
 
 jobs:
   create-deployment-linux:
@@ -128,6 +132,13 @@ workflows:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
       - gcp-gke/create-cluster:
+          name: create-cluster-linux-oidc
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          no_output_timeout: 20m
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud-oidc
+      - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
           no_output_timeout: 20m
@@ -155,6 +166,7 @@ workflows:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
       - create-deployment-linux:
+          name: create-deployment-linux
           requires:
             - create-cluster-linux
           cluster-name: linux-$CLUSTER_SUFFIX
@@ -164,6 +176,17 @@ workflows:
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
+      - create-deployment-linux:
+          name: create-deployment-linux-oidc
+          requires:
+            - create-cluster-linux-oidc
+          cluster-name: linux-oidc-$CLUSTER_SUFFIX
+          full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
+          docker-image-name: my-image
+          version-info: $CIRCLE_SHA1
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud-oidc
       - create-deployment-windows:
           requires:
             - create-node-pool-windows
@@ -172,6 +195,7 @@ workflows:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
       - gcp-gke/publish-and-rollout-image:
+          name: publish-and-rollout-image
           post-steps:
             - kubernetes/get-rollout-status:
                 resource-name: deployment/demoapp
@@ -181,6 +205,28 @@ workflows:
           requires:
             - create-deployment-linux
           cluster: linux-$CLUSTER_SUFFIX
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+          namespace: default
+          dockerfile_name: Dockerfile
+          dockerfile_dir: /home/circleci/project/tests/demoapp
+          docker_context: /home/circleci/project/tests/demoapp
+          pre-steps:
+            - *resolve-cluster-suffix
+      - gcp-gke/publish-and-rollout-image:
+          name: publish-and-rollout-image-oidc
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+                namespace: default
+          requires:
+            - create-deployment-linux-oidc
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          use_oidc: true
           deployment: demoapp
           container: app
           image: my-image
@@ -204,10 +250,18 @@ workflows:
           name: delete-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
           requires:
-            - gcp-gke/publish-and-rollout-image
+            - publish-and-rollout-image
           pre-steps:
             - *resolve-cluster-suffix
             - *install-and-setup-gcloud
+      - gcp-gke/delete-cluster:
+          name: delete-cluster-linux-oidc
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          requires:
+            - publish-and-rollout-image-oidc
+          pre-steps:
+            - *resolve-cluster-suffix
+            - *install-and-setup-gcloud-oidc
       - gcp-gke/delete-cluster:
           name: delete-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
