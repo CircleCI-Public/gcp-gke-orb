@@ -124,28 +124,31 @@ workflows:
       - gcp-gke/create-cluster:
           name: create-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
-          no_output_timeout: 20m
+          no_output_timeout: 30m
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/create-cluster:
           name: create-cluster-linux-oidc
           use_oidc: true
           cluster: linux-oidc-$CLUSTER_SUFFIX
-          no_output_timeout: 20m
+          no_output_timeout: 30m
           pre-steps: *resolve-cluster-suffix
           context: cpe-gcp
       - gcp-gke/create-cluster:
           name: create-autopilot-cluster-linux
           cluster: linux-autopilot-$CLUSTER_SUFFIX
-          no_output_timeout: 20m
+          no_output_timeout: 30m
           autopilot: true
           additional_args: "--region=us-central1"
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/create-cluster:
           name: create-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
-          no_output_timeout: 20m
+          no_output_timeout: 30m
           additional_args: "--cluster-version=1.22.12-gke.2300 --enable-ip-alias --num-nodes=1"
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/create-node-pool:
           name: create-node-pool-windows
           node_pool: my-pool-windows
@@ -154,6 +157,7 @@ workflows:
           requires:
             - create-cluster-windows
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - create-deployment-linux:
           name: create-deployment-linux
           requires:
@@ -163,6 +167,7 @@ workflows:
           docker-image-name: my-image
           version-info: $CIRCLE_SHA1
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - create-deployment-linux:
           name: create-deployment-linux-oidc
           requires:
@@ -179,6 +184,7 @@ workflows:
             - create-node-pool-windows
           cluster-name: windows-$CLUSTER_SUFFIX
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/publish-and-rollout-image:
           name: publish-and-rollout-image
           post-steps:
@@ -199,6 +205,7 @@ workflows:
           dockerfile_dir: /home/circleci/project/tests/demoapp
           docker_context: /home/circleci/project/tests/demoapp
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/publish-and-rollout-image:
           name: publish-and-rollout-image-oidc
           post-steps:
@@ -228,12 +235,14 @@ workflows:
           requires:
             - create-deployment-windows
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/delete-cluster:
           name: delete-cluster-linux
           cluster: linux-$CLUSTER_SUFFIX
           requires:
             - publish-and-rollout-image
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/delete-cluster:
           name: delete-cluster-linux-oidc
           cluster: linux-oidc-$CLUSTER_SUFFIX
@@ -249,12 +258,14 @@ workflows:
           requires:
             - create-autopilot-cluster-linux
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - gcp-gke/delete-cluster:
           name: delete-cluster-windows
           cluster: windows-$CLUSTER_SUFFIX
           requires:
             - delete-node-pool-windows
           pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:
