@@ -1,5 +1,5 @@
 description: >
-  "Update a deployment's Docker image."
+  Update a deployment's Docker image.
 
 parameters:
   deployment:
