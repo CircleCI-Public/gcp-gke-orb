@@ -1,8 +1,7 @@
-description: "Update a deployment's Docker image."
+description: >
+  Update a deployment's Docker image.
+
 parameters:
-  cluster:
-    description: "The Kubernetes cluster name."
-    type: string
   deployment:
     description: "The Kubernetes deployment name."
     type: string
@@ -20,21 +19,24 @@ parameters:
     description: "The Kubernetes namespace name."
     type: string
     default: ""
-  dry-run:
+  dry_run:
     default: none
     description: |
-      Must be "none", "server", or "client". If client strategy, only print the object that would be sent, without sending it. If server strategy, submit server-side request without persisting the resource.
+      Must be "none", "server", or "client".
+      If client strategy, only print the object that would be sent, without sending it.
+      If server strategy, submit server-side request without persisting the resource.
     type: enum
     enum: ["none", "server", "client"]
+
 steps:
-  - update-kubeconfig-with-credentials:
-      cluster: <<parameters.cluster>>
   - run:
       name: Roll out image
-      command: |
-        DRY_RUN="<< parameters.dry-run >>"
-        if [ -n "<<parameters.namespace>>" ]; then
-          set -- "$@" --namespace="<<parameters.namespace>>"
-        fi
-        set -- "$@" "--dry-run=${DRY_RUN}"
-        kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>> "$@"
+      environment:
+        ORB_EVAL_DRY_RUN: << parameters.dry_run >>
+        ORB_EVAL_NAMESPACE: << parameters.namespace >>
+        ORB_EVAL_DEPLOYMENT: << parameters.deployment >>
+        ORB_EVAL_CONTAINER: << parameters.container >>
+        ORB_EVAL_IMAGE: << parameters.image >>
+        ORB_EVAL_TAG: << parameters.tag >>
+        ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
+      command: <<include(scripts/rollout-image.sh)>>

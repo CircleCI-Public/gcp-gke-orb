@@ -1,0 +1,292 @@
+version: 2.1
+orbs:
+  gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
+  orb-tools: circleci/orb-tools@11.5
+  gcp-cli: circleci/gcp-cli@3.0
+  gcp-gcr: circleci/gcp-gcr@0.15
+  kubernetes: circleci/kubernetes@1.3
+
+filters: &filters
+  tags:
+    only: /.*/
+
+pre-steps:
+  resolve-cluster-suffix: &resolve-cluster-suffix
+    - run:
+        name: Resolve cluster suffix
+        command: |
+          workflow_id_prefix="${CIRCLE_WORKFLOW_ID%-*}-"
+          workflow_id_suffix="${CIRCLE_WORKFLOW_ID#"$workflow_id_prefix"}"
+          cluster_suffix="$workflow_id_suffix"
+          echo "export CLUSTER_SUFFIX=$cluster_suffix" >> "$BASH_ENV"
+
+jobs:
+  create-deployment-linux:
+    parameters:
+      cluster-name:
+        type: string
+      docker-image-name:
+        type: string
+      full-image-name:
+        type: string
+      version-info:
+        type: string
+      use_oidc:
+        type: boolean
+        default: false
+    executor: gcp-gke/default
+    steps:
+      - setup_remote_docker
+      - checkout
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin kubectl"
+          use_oidc: <<parameters.use_oidc>>
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: <<parameters.cluster-name>>
+      - run:
+          name: Create deployment manifest
+          command: |
+            # Replace the placeholders in the manifest with the intended values.
+            BUILD_DATE=$(date '+%Y%m%d%H%M%S')
+            cat tests/demoapp/deployment.yaml.template |\
+               sed "s|DOCKER_IMAGE_NAME|<< parameters.full-image-name >>:$CIRCLE_SHA1|\
+                g;s|BUILD_DATE_VALUE|$BUILD_DATE|g;s|VERSION_INFO_VALUE|\
+                << parameters.version-info >>|g" > tests/demoapp/deployment.yaml
+      - gcp-gcr/gcr-auth
+      - gcp-gcr/build-image:
+          image: << parameters.docker-image-name >>
+          tag: $CIRCLE_SHA1
+          dockerfile: Dockerfile
+          path: /home/circleci/project/tests/demoapp
+          docker-context: /home/circleci/project/tests/demoapp
+      - gcp-gcr/push-image:
+          image: << parameters.docker-image-name >>
+          tag: $CIRCLE_SHA1
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "tests/demoapp/deployment.yaml"
+          get-rollout-status: true
+          watch-timeout: 1h
+          resource-name: deployment/demoapp
+  create-deployment-windows:
+    parameters:
+      cluster-name:
+        type: string
+    executor: gcp-gke/default
+    steps:
+      - setup_remote_docker
+      - checkout
+      - gcp-cli/setup:
+          components: "gke-gcloud-auth-plugin kubectl"
+      - gcp-gke/update-kubeconfig-with-credentials:
+          cluster: <<parameters.cluster-name>>
+      - run:
+          name: Check cluster initialization
+          command: |
+            kubectl get mutatingwebhookconfigurations
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "tests/windows-iis/deployment.yaml"
+          resource-name: "deployment/iis"
+      - run:
+          name: Show the resource rollout status
+          command: |
+            for attempt in {1..20}; do
+              set -x
+              { kubectl rollout status -f "tests/windows-iis/deployment.yaml"; error_code=$?; }
+              set +x
+              [ "$error_code" -eq 0 ] && break
+              sleep 30
+            done
+          no_output_timeout: 1h
+      - run:
+          name: Expose deployment via a service
+          command: |
+            kubectl expose deployment iis --type=LoadBalancer --name=iis
+      - run:
+          name: Validate service
+          command: |
+            kubectl get services
+            sleep 30
+            for attempt in {1..20}; do
+              EXTERNAL_IP=$(kubectl get service iis | awk '{print $4}' | tail -n1)
+              echo "Checking external IP: ${EXTERNAL_IP}"
+              if [ -n "${EXTERNAL_IP}" ] && [ -z $(echo "${EXTERNAL_IP}" | grep "pending") ]; then
+                break
+              fi
+              echo "Waiting for external IP to be ready: ${EXTERNAL_IP}"
+              sleep 10
+            done
+            sleep 180
+            curl -s --retry 10 "http://$EXTERNAL_IP" | grep "IIS Windows Server"
+      - kubernetes/delete-resource:
+          resource-types: "deployment,service"
+          resource-names: "iis"
+          now: true
+          wait: true
+
+workflows:
+  test-deploy:
+    jobs:
+      - gcp-gke/create-cluster:
+          name: create-cluster-linux
+          cluster: linux-$CLUSTER_SUFFIX
+          no_output_timeout: 30m
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/create-cluster:
+          name: create-cluster-linux-oidc
+          use_oidc: true
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          no_output_timeout: 30m
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/create-cluster:
+          name: create-autopilot-cluster-linux
+          cluster: linux-autopilot-$CLUSTER_SUFFIX
+          no_output_timeout: 30m
+          autopilot: true
+          additional_args: "--region=us-central1"
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/create-cluster:
+          name: create-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
+          no_output_timeout: 30m
+          additional_args: "--release-channel=regular --enable-ip-alias --num-nodes=1 --region=us-central1-a"
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/create-node-pool:
+          name: create-node-pool-windows
+          node_pool: my-pool-windows
+          cluster: windows-$CLUSTER_SUFFIX
+          additional_args: "--image-type=WINDOWS_LTSC_CONTAINERD --no-enable-autoupgrade --machine-type=n1-standard-2 --num-nodes=1 --region=us-central1-a"
+          requires:
+            - create-cluster-windows
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - create-deployment-linux:
+          name: create-deployment-linux
+          requires:
+            - create-cluster-linux
+          cluster-name: linux-$CLUSTER_SUFFIX
+          full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
+          docker-image-name: my-image
+          version-info: $CIRCLE_SHA1
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - create-deployment-linux:
+          name: create-deployment-linux-oidc
+          requires:
+            - create-cluster-linux-oidc
+          cluster-name: linux-oidc-$CLUSTER_SUFFIX
+          use_oidc: true
+          full-image-name: gcr.io/$GOOGLE_PROJECT_ID/my-image
+          docker-image-name: my-image
+          version-info: $CIRCLE_SHA1
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - create-deployment-windows:
+          requires:
+            - create-node-pool-windows
+          cluster-name: windows-$CLUSTER_SUFFIX
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/publish-and-rollout-image:
+          name: publish-and-rollout-image
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+                namespace: default
+          requires:
+            - create-deployment-linux
+          cluster: linux-$CLUSTER_SUFFIX
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+          namespace: default
+          dockerfile_name: Dockerfile
+          dockerfile_dir: /home/circleci/project/tests/demoapp
+          docker_context: /home/circleci/project/tests/demoapp
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/publish-and-rollout-image:
+          name: publish-and-rollout-image-oidc
+          post-steps:
+            - kubernetes/get-rollout-status:
+                resource-name: deployment/demoapp
+                watch-rollout-status: true
+                watch-timeout: 3m
+                namespace: default
+          requires:
+            - create-deployment-linux-oidc
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          use_oidc: true
+          deployment: demoapp
+          container: app
+          image: my-image
+          tag: $CIRCLE_SHA1
+          namespace: default
+          dockerfile_name: Dockerfile
+          dockerfile_dir: /home/circleci/project/tests/demoapp
+          docker_context: /home/circleci/project/tests/demoapp
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/delete-node-pool:
+          name: delete-node-pool-windows
+          node_pool: my-pool-windows
+          cluster: windows-$CLUSTER_SUFFIX
+          additional_args: "--region=us-central1-a"
+          requires:
+            - create-deployment-windows
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/delete-cluster:
+          name: delete-cluster-linux
+          cluster: linux-$CLUSTER_SUFFIX
+          requires:
+            - publish-and-rollout-image
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/delete-cluster:
+          name: delete-cluster-linux-oidc
+          cluster: linux-oidc-$CLUSTER_SUFFIX
+          use_oidc: true
+          requires:
+            - publish-and-rollout-image-oidc
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/delete-cluster:
+          name: delete-autopilot-cluster-linux
+          cluster: linux-autopilot-$CLUSTER_SUFFIX
+          additional_args: "--region=us-central1"
+          requires:
+            - create-autopilot-cluster-linux
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - gcp-gke/delete-cluster:
+          name: delete-cluster-windows
+          cluster: windows-$CLUSTER_SUFFIX
+          requires:
+            - delete-node-pool-windows
+          pre-steps: *resolve-cluster-suffix
+          context: cpe-gcp
+      - orb-tools/pack:
+          filters: *filters
+      - orb-tools/publish:
+          orb-name: circleci/gcp-gke
+          vcs-type: << pipeline.project.type >>
+          pub-type: production
+          requires:
+            - orb-tools/pack
+            - delete-cluster-linux
+            - delete-cluster-windows
+          context: orb-publisher
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+# VS Code Extension Version: 1.4.0
