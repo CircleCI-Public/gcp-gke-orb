@@ -48,6 +48,11 @@ parameters:
     description: |
       Name of environment variable storing the Google compute region to set as
       default for the gcloud CLI.
+  gcloud_version:
+    type: string
+    default: latest
+    description: |
+      Version of gcloud CLI to install.
   # OIDC parameters
   use_oidc:
     type: boolean
@@ -86,6 +91,7 @@ parameters:
 
 steps:
   - gcp-cli/setup:
+      version: <<parameters.gcloud_version>>
       components: "gke-gcloud-auth-plugin kubectl"
       gcloud_service_key: <<parameters.gcloud_service_key>>
       google_project_id: <<parameters.google_project_id>>
