@@ -143,9 +143,9 @@ parameters:
     default: "deployment"
     description: |
       Workload type to rollout image. 
-      Possible resources include (case insensitive):
-      pod (po), replicationcontroller (rc), deployment (deploy), daemonset (ds), statefulset (sts), cronjob (cj), replicaset (rs)
-    type: string
+      Must be "pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", or "replicaset".
+    enum: ["pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", "replicaset"]
+    type: enum
 
 steps:
   - when:
