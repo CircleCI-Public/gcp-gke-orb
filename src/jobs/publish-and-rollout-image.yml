@@ -139,6 +139,13 @@ parameters:
     description: |
       Output location of OIDC credentials.
       Required if "use_oidc" is set to true.
+  workload_type:
+    default: "deployment"
+    description: |
+      Workload type to rollout image. 
+      Possible resources include (case insensitive):
+      pod (po), replicationcontroller (rc), deployment (deploy), daemonset (ds), statefulset (sts), cronjob (cj), replicaset (rs)
+    type: string
 
 steps:
   - when:
@@ -199,3 +206,4 @@ steps:
       tag: "<<parameters.tag>>"
       namespace: "<<parameters.namespace>>"
       dry_run: "<<parameters.dry_run>>"
+      workload_type: "<<parameters.workload_type>>"

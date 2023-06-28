@@ -27,6 +27,13 @@ parameters:
       If server strategy, submit server-side request without persisting the resource.
     type: enum
     enum: ["none", "server", "client"]
+  workload_type:
+    default: "deployment"
+    description: |
+      Workload type to rollout. 
+      Possible resources include (case insensitive):
+      pod (po), replicationcontroller (rc), deployment (deploy), daemonset (ds), statefulset (sts), cronjob (cj), replicaset (rs)
+    type: string
 
 steps:
   - run:
@@ -38,5 +45,6 @@ steps:
         ORB_EVAL_CONTAINER: << parameters.container >>
         ORB_EVAL_IMAGE: << parameters.image >>
         ORB_EVAL_TAG: << parameters.tag >>
+        ORB_EVAL_WORKLOAD_TYPE: << parameters.workload_type >>
         ORB_SCRIPT_UTILS: <<include(scripts/utils.sh)>>
       command: <<include(scripts/rollout-image.sh)>>
