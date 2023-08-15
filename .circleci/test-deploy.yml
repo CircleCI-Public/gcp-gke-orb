@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
-  gcp-gke: circleci/gcp-gke@dev:<<pipeline.git.revision>>
-  orb-tools: circleci/orb-tools@11.5
+  gcp-gke: {}
+  orb-tools: circleci/orb-tools@12.0
   gcp-cli: circleci/gcp-cli@3.0
   gcp-gcr: circleci/gcp-gcr@0.15
   kubernetes: circleci/kubernetes@1.3
@@ -9,6 +9,12 @@ orbs:
 filters: &filters
   tags:
     only: /.*/
+
+release-filters: &release-filters
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
 pre-steps:
   resolve-cluster-suffix: &resolve-cluster-suffix
@@ -273,20 +279,16 @@ workflows:
           pre-steps: *resolve-cluster-suffix
           context: cpe-gcp
       - orb-tools/pack:
-          filters: *filters
+          filters: *release-filters
       - orb-tools/publish:
-          orb-name: circleci/gcp-gke
-          vcs-type: << pipeline.project.type >>
-          pub-type: production
+          orb_name: circleci/gcp-gke
+          vcs_type: << pipeline.project.type >>
+          pub_type: production
           requires:
             - orb-tools/pack
             - delete-cluster-linux
             - delete-cluster-windows
           context: orb-publisher
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+          filters: *release-filters
 
 # VS Code Extension Version: 1.4.0
