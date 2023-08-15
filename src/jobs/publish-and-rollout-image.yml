@@ -1,4 +1,3 @@
-
 description: "Update cluster with new Docker image."
 
 executor: <<parameters.executor>>
@@ -142,7 +141,7 @@ parameters:
   workload_type:
     default: "deployment"
     description: |
-      Workload type to rollout image. 
+      Workload type to rollout image.
       Must be "pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", or "replicaset".
     enum: ["pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", "replicaset"]
     type: enum
@@ -151,15 +150,15 @@ steps:
   - when:
       condition: <<parameters.use_remote_docker>>
       steps:
-          - when:
-              condition: <<parameters.remote_docker_version>>
-              steps:
-                - setup_remote_docker:
-                    version: <<parameters.remote_docker_version>>
-          - unless:
-              condition: <<parameters.remote_docker_version>>
-              steps:
-                - setup_remote_docker
+        - when:
+            condition: <<parameters.remote_docker_version>>
+            steps:
+              - setup_remote_docker:
+                  version: <<parameters.remote_docker_version>>
+        - unless:
+            condition: <<parameters.remote_docker_version>>
+            steps:
+              - setup_remote_docker
   - checkout
   - gcp-cli/setup:
       version: <<parameters.gcloud_version>>

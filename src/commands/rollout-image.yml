@@ -30,7 +30,7 @@ parameters:
   workload_type:
     default: "deployment"
     description: |
-      Workload type to rollout image. 
+      Workload type to rollout image.
       Must be "pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", or "replicaset".
     enum: ["pod", "replicationcontroller", "deployment", "daemonset", "statefulset", "cronjob", "replicaset"]
     type: enum
