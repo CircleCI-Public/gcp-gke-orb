@@ -12,5 +12,5 @@ build_args=(
 
 set -x
 # shellcheck disable=SC2048,SC2086 # We want word splitting here.
-kubectl set image deployment "$ORB_EVAL_DEPLOYMENT" "$ORB_EVAL_CONTAINER"="$ORB_EVAL_IMAGE":"$ORB_EVAL_TAG" ${build_args[*]}
+kubectl set image "$ORB_EVAL_WORKLOAD_TYPE" "$ORB_EVAL_DEPLOYMENT" "$ORB_EVAL_CONTAINER"="$ORB_EVAL_IMAGE":"$ORB_EVAL_TAG" ${build_args[*]}
 set +x
