@@ -1,6 +1,6 @@
 description: >
-  "The simplest example of using this Orb. Logs into GCP, builds and
-  publishes a Docker image, and then rolls the image out to a GKE cluster."
+  "The example of using this Orb when using Artifact Registry instead of Container Registry. Logs into GCP, builds and
+  publishes a Docker image into Artifact Registry, and then rolls the image out to a GKE cluster."
 usage:
   version: 2.1
   orbs:
