@@ -1,0 +1,21 @@
+description: >
+  "The simplest example of using this Orb. Logs into GCP, builds and
+  publishes a Docker image, and then rolls the image out to a GKE cluster."
+usage:
+  version: 2.1
+  orbs:
+    gke: circleci/gcp-gke@3.0
+  workflows:
+    main:
+      jobs:
+        # Expects environment variables with the default names
+        # used by the circleci/gcp-cli orb's initialize command
+        # https://circleci.com/orbs/registry/orb/circleci/gcp-cli#commands-initialize
+        - gke/publish-and-rollout-image:
+            cluster: gcp-testing
+            deployment: demo
+            container: app
+            image: myimage
+            tag: "$CIRCLE_SHA1"
+            registry_url: us-docker.pkg.dev
+            repository: docker-repositories
