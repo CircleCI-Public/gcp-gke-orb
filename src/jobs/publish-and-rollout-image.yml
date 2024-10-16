@@ -232,5 +232,3 @@ steps:
             namespace: "<<parameters.namespace>>"
             dry_run: "<<parameters.dry_run>>"
             workload_type: "<<parameters.workload_type>>"
-
-  
