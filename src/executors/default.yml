@@ -9,7 +9,7 @@ parameters:
 
   tag:
     type: string
-    default: "3.13.0"
+    default: "3.8"
     description: Image tag
 
 docker:
